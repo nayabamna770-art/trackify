@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Wraps widgets with spring-scale shrink-on-tap dynamics and haptic feedback
 class SpringScaleButton extends StatefulWidget {
   final Widget child;
   final VoidCallback onTap;
-  final double scaleFactor;
+  final double scaleDownFactor;
 
   const SpringScaleButton({
     super.key,
     required this.child,
     required this.onTap,
-    this.scaleFactor = 0.95,
+    this.scaleDownFactor = 0.94,
   });
 
   @override
@@ -31,13 +30,14 @@ class _SpringScaleButtonState extends State<SpringScaleButton>
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 200),
     );
+
     _scaleAnimation = Tween<double>(
       begin: 1.0,
-      end: widget.scaleFactor,
+      end: widget.scaleDownFactor,
     ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Curves.decelerate,
+        curve: Curves.easeOutCubic,
         reverseCurve: Curves.elasticOut,
       ),
     );
@@ -50,12 +50,12 @@ class _SpringScaleButtonState extends State<SpringScaleButton>
   }
 
   void _onTapDown(TapDownDetails details) {
+    HapticFeedback.lightImpact();
     _controller.forward();
   }
 
   void _onTapUp(TapUpDetails details) {
     _controller.reverse();
-    HapticFeedback.lightImpact();
     widget.onTap();
   }
 
@@ -69,14 +69,8 @@ class _SpringScaleButtonState extends State<SpringScaleButton>
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
       onTapCancel: _onTapCancel,
-      child: AnimatedBuilder(
-        animation: _scaleAnimation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: child,
-          );
-        },
+      child: ScaleTransition(
+        scale: _scaleAnimation,
         child: widget.child,
       ),
     );

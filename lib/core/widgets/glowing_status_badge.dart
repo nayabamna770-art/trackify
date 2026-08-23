@@ -1,43 +1,58 @@
 import 'package:flutter/material.dart';
+import 'glass_container.dart';
 
-/// Frosted pill-shaped badge with soft neon glows for status and cost alerts
 class GlowingStatusBadge extends StatelessWidget {
   final String label;
   final Color color;
+  final IconData? icon;
 
   const GlowingStatusBadge({
     super.key,
     required this.label,
     required this.color,
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(
-          color: color.withValues(alpha: 0.5),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.3),
-            blurRadius: 8,
-            spreadRadius: 1,
+    return GlassContainer(
+      opacity: 0.20,
+      borderRadius: 30.0,
+      accentGlowColor: color,
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8.0,
+            height: 8.0,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.8),
+                  blurRadius: 6.0,
+                  spreadRadius: 2.0,
+                ),
+              ],
+            ),
+          ),
+          if (icon != null) ...[
+            const SizedBox(width: 6.0),
+            Icon(icon, size: 12.0, color: color),
+          ],
+          const SizedBox(width: 6.0),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 11.0,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
           ),
         ],
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-        ),
       ),
     );
   }

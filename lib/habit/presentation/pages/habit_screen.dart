@@ -4,16 +4,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trackify/core/theme/theme_cubit.dart';
 import 'package:trackify/core/theme/theme_state.dart';
 import 'package:trackify/core/widgets/glass_container.dart';
+import 'package:trackify/core/widgets/spring_scale_button.dart';
 import 'package:trackify/habit/bloc/habit_cubit.dart';
 import 'package:trackify/habit/domains/models/habit_model.dart';
 
 class HabitsScreen extends StatelessWidget {
   const HabitsScreen({super.key});
 
-  void _showAddHabitBottomSheet(BuildContext context, dynamic palette, double opacity) {
+  void _showAddHabitBottomSheet(
+      BuildContext context, dynamic palette, double opacity) {
     final titleController = TextEditingController();
     final categoryController = TextEditingController();
-    IconData selectedIcon = Icons.fitness_center;
 
     showModalBottomSheet(
       context: context,
@@ -48,7 +49,8 @@ class HabitsScreen extends StatelessWidget {
                     labelText: 'Habit Title',
                     labelStyle: TextStyle(color: palette.textPrimary),
                     enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: palette.textPrimary.withValues(alpha: 0.3)),
+                      borderSide: BorderSide(
+                          color: palette.textPrimary.withValues(alpha: 0.3)),
                     ),
                     focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: palette.accentPrimary),
@@ -63,7 +65,8 @@ class HabitsScreen extends StatelessWidget {
                     labelText: 'Category (e.g., Productivity, Health)',
                     labelStyle: TextStyle(color: palette.textPrimary),
                     enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: palette.textPrimary.withValues(alpha: 0.3)),
+                      borderSide: BorderSide(
+                          color: palette.textPrimary.withValues(alpha: 0.3)),
                     ),
                     focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: palette.accentPrimary),
@@ -89,10 +92,18 @@ class HabitsScreen extends StatelessWidget {
                           category: categoryController.text.trim().isEmpty
                               ? 'General'
                               : categoryController.text.trim(),
-                          icon: selectedIcon,
+                          icon: Icons.check_circle_outline,
                           streakCount: 0,
                           isCompletedToday: false,
-                          weeklyProgress: const [false, false, false, false, false, false, false],
+                          weeklyProgress: const [
+                            false,
+                            false,
+                            false,
+                            false,
+                            false,
+                            false,
+                            false
+                          ],
                         );
                         context.read<HabitCubit>().addHabit(newHabit);
                         Navigator.pop(bottomSheetContext);
@@ -125,67 +136,80 @@ class HabitsScreen extends StatelessWidget {
         return BlocBuilder<HabitCubit, HabitState>(
           builder: (context, habitState) {
             return Scaffold(
-              backgroundColor: palette.background,
-              floatingActionButton: FloatingActionButton(
-                backgroundColor: palette.accentPrimary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                onPressed: () => _showAddHabitBottomSheet(context, palette, themeState.glassOpacity),
-                child: const Icon(Icons.add, color: Colors.black),
-              ),
-              body: SafeArea(
-                child: ListView(
-                  padding: const EdgeInsets.all(20),
-                  children: [
-                    // Screen Header
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Active Routines',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: palette.textHeading,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Consistency is your compounding edge',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: palette.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        GlassContainer(
-                          borderRadius: 14,
-                          opacity: themeState.glassOpacity,
-                          padding: const EdgeInsets.all(12),
-                          child: Icon(
-                            Icons.local_fire_department,
-                            color: palette.accentSecondary,
-                            size: 24,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Habit List Cards
-                    ...habitState.habits.map((habit) => Padding(
-                          padding: const EdgeInsets.only(bottom: 16.0),
-                          child: _HabitCardWidget(
-                            habit: habit,
-                            palette: palette,
-                            opacity: themeState.glassOpacity,
-                          ),
-                        )),
-                  ],
+              backgroundColor: Colors.transparent,
+              body: ListView(
+                padding: const EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  top: 10,
+                  bottom: 120, // Avoid overlapping with bottom navbar
                 ),
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Active Routines',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: palette.textHeading,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Consistency is your compounding edge',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: palette.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          SpringScaleButton(
+                            onTap: () => _showAddHabitBottomSheet(
+                                context, palette, themeState.glassOpacity),
+                            child: GlassContainer(
+                              borderRadius: 14,
+                              opacity: themeState.glassOpacity,
+                              padding: const EdgeInsets.all(12),
+                              child: Icon(
+                                Icons.add,
+                                color: palette.accentPrimary,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          GlassContainer(
+                            borderRadius: 14,
+                            opacity: themeState.glassOpacity,
+                            padding: const EdgeInsets.all(12),
+                            child: Icon(
+                              Icons.local_fire_department,
+                              color: palette.accentSecondary,
+                              size: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  ...habitState.habits.map((habit) => Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: _HabitCardWidget(
+                          habit: habit,
+                          palette: palette,
+                          opacity: themeState.glassOpacity,
+                        ),
+                      )),
+                ],
               ),
             );
           },
@@ -287,11 +311,12 @@ class _HabitCardWidgetState extends State<_HabitCardWidget> {
                       ),
                     ],
                   ),
-                  // Tactile Haptic Check-off Toggle Button
                   GestureDetector(
                     onTap: () {
                       HapticFeedback.lightImpact();
-                      context.read<HabitCubit>().toggleHabitCompletion(habit.id);
+                      context
+                          .read<HabitCubit>()
+                          .toggleHabitCompletion(habit.id);
                     },
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
@@ -310,7 +335,8 @@ class _HabitCardWidgetState extends State<_HabitCardWidget> {
                         ),
                       ),
                       child: habit.isCompletedToday
-                          ? const Icon(Icons.check, size: 18, color: Colors.black)
+                          ? const Icon(Icons.check,
+                              size: 18, color: Colors.black)
                           : null,
                     ),
                   ),
@@ -322,7 +348,8 @@ class _HabitCardWidgetState extends State<_HabitCardWidget> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.whatshot, size: 16, color: palette.accentSecondary),
+                      Icon(Icons.whatshot,
+                          size: 16, color: palette.accentSecondary),
                       const SizedBox(width: 6),
                       Text(
                         '${habit.streakCount} Day Streak',
@@ -334,7 +361,6 @@ class _HabitCardWidgetState extends State<_HabitCardWidget> {
                       ),
                     ],
                   ),
-                  // Weekly progress dots
                   Row(
                     children: habit.weeklyProgress.map((done) {
                       return Container(

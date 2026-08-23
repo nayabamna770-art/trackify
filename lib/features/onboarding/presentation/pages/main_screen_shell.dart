@@ -6,22 +6,36 @@ import 'package:trackify/core/widgets/floating_frosted_navbar.dart';
 import 'package:trackify/core/widgets/glass_container.dart';
 import 'package:trackify/core/widgets/glow_orb.dart';
 import 'package:trackify/core/widgets/spring_scale_button.dart';
-import 'package:trackify/features/dashboard/presentation/pages/dashboard_screen.dart';
 import 'package:trackify/core/widgets/theme_selection_bottom_sheet.dart';
+import 'package:trackify/features/dashboard/presentation/pages/dashboard_screen.dart';
+import 'package:trackify/habit/bloc/habit_cubit.dart';
+import 'package:trackify/habit/presentation/pages/habit_screen.dart';
 
-class MainScreenShell extends StatefulWidget {
+class MainScreenShell extends StatelessWidget {
   const MainScreenShell({super.key});
 
   @override
-  State<MainScreenShell> createState() => _MainScreenShellState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => HabitCubit(),
+      child: const _MainScreenShellView(),
+    );
+  }
 }
 
-class _MainScreenShellState extends State<MainScreenShell> {
+class _MainScreenShellView extends StatefulWidget {
+  const _MainScreenShellView();
+
+  @override
+  State<_MainScreenShellView> createState() => _MainScreenShellViewState();
+}
+
+class _MainScreenShellViewState extends State<_MainScreenShellView> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = const [
     DashboardScreen(),
-    Center(child: Text('Habit Screen', style: TextStyle(fontSize: 18))),
+    HabitsScreen(),
     Center(child: Text('Subscription Screen', style: TextStyle(fontSize: 18))),
   ];
 
@@ -55,6 +69,7 @@ class _MainScreenShellState extends State<MainScreenShell> {
               SafeArea(
                 child: Column(
                   children: [
+                    // Consistent Shell Header across all views
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20.0,
@@ -89,7 +104,8 @@ class _MainScreenShellState extends State<MainScreenShell> {
                             children: [
                               SpringScaleButton(
                                 onTap: () {
-                                  final themeCubit = context.read<ThemeCubit>();
+                                  final themeCubit =
+                                      context.read<ThemeCubit>();
 
                                   showModalBottomSheet(
                                     context: context,

@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:trackify/app/constants/app_colors.dart';
-import 'package:trackify/core/widgets/glass_container.dart';
+import 'package:trackify/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:trackify/features/onboarding/presentation/pages/splash_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const TrackifyApp());
 }
 
-class TrackifyApp extends StatelessWidget {
+class TrackifyApp extends StatefulWidget {
   const TrackifyApp({super.key});
+
+  @override
+  State<TrackifyApp> createState() => _TrackifyAppState();
+}
+
+class _TrackifyAppState extends State<TrackifyApp> {
+  bool _isSplashDone = false;
 
   @override
   Widget build(BuildContext context) {
@@ -19,17 +27,15 @@ class TrackifyApp extends StatelessWidget {
         scaffoldBackgroundColor: AppColors.tokyoBackground,
         useMaterial3: true,
       ),
-      home: const Scaffold(
-        backgroundColor: AppColors.tokyoBackground,
-        body: Center(
-          child: GlassContainer(
-            child: Text(
-              'Trackify Glass Engine Active',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+      home: _isSplashDone
+          ? OnboardingPage(onOnboardingComplete: () {})
+          : SplashScreen(
+              onSplashComplete: () {
+                setState(() {
+                  _isSplashDone = true;
+                });
+              },
             ),
-          ),
-        ),
-      ),
     );
   }
 }

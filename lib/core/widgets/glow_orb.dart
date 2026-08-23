@@ -1,41 +1,34 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
-/// Floating blurred gradient circle placed behind glass cards for visual depth
 class GlowOrb extends StatelessWidget {
   final double size;
   final Color color;
-  final Alignment alignment;
   final double blurRadius;
+  final double opacity;
 
   const GlowOrb({
     super.key,
     this.size = 200.0,
     required this.color,
-    this.alignment = Alignment.center,
-    this.blurRadius = 60.0,
+    this.blurRadius = 80.0,
+    this.opacity = 0.45,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: alignment,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color,
-        ),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: blurRadius,
-            sigmaY: blurRadius,
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color.withValues(alpha: opacity),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: opacity),
+            blurRadius: blurRadius,
+            spreadRadius: blurRadius / 2,
           ),
-          child: Container(
-            color: Colors.transparent,
-          ),
-        ),
+        ],
       ),
     );
   }

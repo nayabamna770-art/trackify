@@ -7,6 +7,7 @@ import 'package:trackify/core/widgets/glass_container.dart';
 import 'package:trackify/core/widgets/glow_orb.dart';
 import 'package:trackify/core/widgets/spring_scale_button.dart';
 import 'package:trackify/features/dashboard/presentation/pages/dashboard_screen.dart';
+import 'package:trackify/core/widgets/theme_selection_bottom_sheet.dart';
 
 class MainScreenShell extends StatefulWidget {
   const MainScreenShell({super.key});
@@ -87,7 +88,22 @@ class _MainScreenShellState extends State<MainScreenShell> {
                           Row(
                             children: [
                               SpringScaleButton(
-                                onTap: () {},
+                                onTap: () {
+                                  final themeCubit = context.read<ThemeCubit>();
+
+                                  showModalBottomSheet(
+                                    context: context,
+                                    backgroundColor: Colors.transparent,
+                                    isScrollControlled: true,
+                                    builder: (sheetContext) {
+                                      return BlocProvider.value(
+                                        value: themeCubit,
+                                        child:
+                                            const ThemeSelectionBottomSheet(),
+                                      );
+                                    },
+                                  );
+                                },
                                 child: GlassContainer(
                                   padding: const EdgeInsets.all(10),
                                   borderRadius: 14,

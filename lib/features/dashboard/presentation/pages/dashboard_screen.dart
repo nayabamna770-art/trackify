@@ -21,94 +21,99 @@ class DashboardScreen extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: GlassContainer(
-                    padding: const EdgeInsets.all(18),
-                    borderRadius: 24,
-                    opacity: themeState.glassOpacity,
-                    accentGlowColor: palette.accentPrimary,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'DAILY OVERVIEW',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                            color: palette.accentPrimary,
+                  child: _HoverPopCard(
+                    child: GlassContainer(
+                      padding: const EdgeInsets.all(18),
+                      borderRadius: 24,
+                      opacity: themeState.glassOpacity,
+                      accentGlowColor: palette.accentPrimary,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'DAILY OVERVIEW',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                              color: palette.accentPrimary,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Welcome Back!',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: palette.textHeading,
+                          const SizedBox(height: 6),
+                          Text(
+                            'Welcome Back!',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: palette.textHeading,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'You are on a roll this week.',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: palette.textPrimary.withValues(alpha: 0.7),
+                          const SizedBox(height: 4),
+                          Text(
+                            'You are on a roll this week.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: palette.textPrimary.withValues(alpha: 0.7),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 14),
                 // Fiery Streak Badge
-                GlassContainer(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 16,
-                  ),
-                  borderRadius: 24,
-                  opacity: themeState.glassOpacity + 0.05,
-                  accentGlowColor: Colors.orangeAccent,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.orangeAccent.withValues(alpha: 0.2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.orangeAccent.withValues(alpha: 0.4),
-                              blurRadius: 12,
-                              spreadRadius: 2,
-                            ),
-                          ],
+                _HoverPopCard(
+                  child: GlassContainer(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 16,
+                    ),
+                    borderRadius: 24,
+                    opacity: themeState.glassOpacity + 0.05,
+                    accentGlowColor: Colors.orangeAccent,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.orangeAccent.withValues(alpha: 0.2),
+                            boxShadow: [
+                              BoxShadow(
+                                color:
+                                    Colors.orangeAccent.withValues(alpha: 0.4),
+                                blurRadius: 12,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.local_fire_department_rounded,
+                            color: Colors.orangeAccent,
+                            size: 32,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.local_fire_department_rounded,
-                          color: Colors.orangeAccent,
-                          size: 32,
+                        const SizedBox(height: 8),
+                        Text(
+                          '18',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            color: palette.textHeading,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '18',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          color: palette.textHeading,
+                        Text(
+                          'Days Streak',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: palette.textPrimary.withValues(alpha: 0.7),
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Days Streak',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: palette.textPrimary.withValues(alpha: 0.7),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -125,10 +130,12 @@ class DashboardScreen extends StatelessWidget {
               headingColor: palette.textHeading,
             ),
             const SizedBox(height: 12),
-            _buildHabitHeatmapGrid(
-              themeState: themeState,
-              accentColor: palette.accentPrimary,
-              textColor: palette.textPrimary,
+            _HoverPopCard(
+              child: _buildHabitHeatmapGrid(
+                themeState: themeState,
+                accentColor: palette.accentPrimary,
+                textColor: palette.textPrimary,
+              ),
             ),
 
             const SizedBox(height: 28),
@@ -142,20 +149,21 @@ class DashboardScreen extends StatelessWidget {
               headingColor: palette.textHeading,
             ),
             const SizedBox(height: 12),
-            _buildSubscriptionHeatmapGrid(
-              themeState: themeState,
-              accentColor: palette.accentSecondary,
-              textColor: palette.textPrimary,
+            _HoverPopCard(
+              child: _buildSubscriptionHeatmapGrid(
+                themeState: themeState,
+                accentColor: palette.accentSecondary,
+                textColor: palette.textPrimary,
+              ),
             ),
 
-            const SizedBox(height: 100), // Space for floating bottom navbar
+            const SizedBox(height: 100),
           ],
         );
       },
     );
   }
 
-  // Section Title Widget
   Widget _buildSectionHeader({
     required String title,
     required String subtitle,
@@ -191,7 +199,6 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // --- HABIT HEATMAP (Weekdays Mon - Sun) ---
   Widget _buildHabitHeatmapGrid({
     required ThemeState themeState,
     required Color accentColor,
@@ -199,15 +206,14 @@ class DashboardScreen extends StatelessWidget {
   }) {
     final daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-    // Mock completion density (0 to 4 intensity)
     final mockActivity = [
-      [3, 4, 2, 4, 1], // Mon
-      [2, 3, 4, 1, 4], // Tue
-      [4, 4, 3, 2, 3], // Wed
-      [1, 2, 4, 4, 2], // Thu
-      [4, 3, 1, 3, 4], // Fri
-      [0, 1, 2, 1, 2], // Sat
-      [2, 2, 3, 4, 3], // Sun
+      [3, 4, 2, 4, 1],
+      [2, 3, 4, 1, 4],
+      [4, 4, 3, 2, 3],
+      [1, 2, 4, 4, 2],
+      [4, 3, 1, 3, 4],
+      [0, 1, 2, 1, 2],
+      [2, 2, 3, 4, 3],
     ];
 
     return GlassContainer(
@@ -236,21 +242,10 @@ class DashboardScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: List.generate(5, (colIndex) {
                       final intensity = mockActivity[rowIndex][colIndex];
-                      return Container(
-                        width: 22,
-                        height: 22,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(6),
-                          color: intensity == 0
-                              ? textColor.withValues(alpha: 0.08)
-                              : accentColor.withValues(alpha: 0.2 * intensity),
-                          border: Border.all(
-                            color: intensity > 0
-                                ? accentColor.withValues(alpha: 0.4)
-                                : Colors.transparent,
-                            width: AppGlassStyle.borderWidth,
-                          ),
-                        ),
+                      return _HoverHeatmapCell(
+                        intensity: intensity,
+                        accentColor: accentColor,
+                        textColor: textColor,
                       );
                     }),
                   ),
@@ -263,14 +258,17 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // --- SUBSCRIPTION HEATMAP (Monthly Day Matrix) ---
   Widget _buildSubscriptionHeatmapGrid({
     required ThemeState themeState,
     required Color accentColor,
     required Color textColor,
   }) {
-    // Mock days with upcoming renewals (e.g. Day 5, Day 14, Day 21, Day 28)
-    final activeRenewalDays = {5: '\$14', 14: '\$9.99', 21: '\$12', 28: '\$4.99'};
+    final activeRenewalDays = {
+      5: '\$14',
+      14: '\$9.99',
+      21: '\$12',
+      28: '\$4.99'
+    };
 
     return GlassContainer(
       padding: const EdgeInsets.all(16),
@@ -284,50 +282,193 @@ class DashboardScreen extends StatelessWidget {
           crossAxisSpacing: 8,
           mainAxisSpacing: 8,
         ),
-        itemCount: 28, // 4 weeks representation
+        itemCount: 28,
         itemBuilder: (context, index) {
           final day = index + 1;
           final isRenewal = activeRenewalDays.containsKey(day);
 
-          return Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: isRenewal
-                  ? accentColor.withValues(alpha: 0.25)
-                  : textColor.withValues(alpha: 0.05),
-              border: Border.all(
-                color: isRenewal
-                    ? accentColor.withValues(alpha: 0.6)
-                    : Colors.transparent,
-                width: AppGlassStyle.borderWidth,
-              ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '$day',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: isRenewal ? FontWeight.bold : FontWeight.normal,
-                    color: isRenewal ? accentColor : textColor.withValues(alpha: 0.5),
-                  ),
-                ),
-                if (isRenewal) ...[
-                  const SizedBox(height: 1),
-                  Container(
-                    width: 4,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: accentColor,
-                    ),
-                  ),
-                ],
-              ],
-            ),
+          return _HoverSubscriptionCell(
+            day: day,
+            isRenewal: isRenewal,
+            accentColor: accentColor,
+            textColor: textColor,
           );
         },
+      ),
+    );
+  }
+}
+
+// --- HOVER WRAPPER FOR MAIN CARDS ---
+class _HoverPopCard extends StatefulWidget {
+  final Widget child;
+  const _HoverPopCard({required this.child});
+
+  @override
+  State<_HoverPopCard> createState() => _HoverPopCardState();
+}
+
+class _HoverPopCardState extends State<_HoverPopCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedScale(
+        scale: _isHovered ? 1.02 : 1.0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+// --- HOVER HEATMAP CELL ---
+class _HoverHeatmapCell extends StatefulWidget {
+  final int intensity;
+  final Color accentColor;
+  final Color textColor;
+
+  const _HoverHeatmapCell({
+    required this.intensity,
+    required this.accentColor,
+    required this.textColor,
+  });
+
+  @override
+  State<_HoverHeatmapCell> createState() => _HoverHeatmapCellState();
+}
+
+class _HoverHeatmapCellState extends State<_HoverHeatmapCell> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isFilled = widget.intensity > 0;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedScale(
+        scale: _isHovered ? 1.4 : 1.0,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutCubic,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: 22,
+          height: 22,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            color: !isFilled
+                ? widget.textColor.withValues(alpha: 0.08)
+                : widget.accentColor.withValues(alpha: 0.2 * widget.intensity),
+            border: Border.all(
+              color: isFilled || _isHovered
+                  ? widget.accentColor.withValues(alpha: _isHovered ? 1.0 : 0.4)
+                  : Colors.transparent,
+              width: AppGlassStyle.borderWidth,
+            ),
+            boxShadow: _isHovered && isFilled
+                ? [
+                    BoxShadow(
+                      color: widget.accentColor.withValues(alpha: 0.8),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                    )
+                  ]
+                : [],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// --- HOVER SUBSCRIPTION CELL ---
+class _HoverSubscriptionCell extends StatefulWidget {
+  final int day;
+  final bool isRenewal;
+  final Color accentColor;
+  final Color textColor;
+
+  const _HoverSubscriptionCell({
+    required this.day,
+    required this.isRenewal,
+    required this.accentColor,
+    required this.textColor,
+  });
+
+  @override
+  State<_HoverSubscriptionCell> createState() => _HoverSubscriptionCellState();
+}
+
+class _HoverSubscriptionCellState extends State<_HoverSubscriptionCell> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedScale(
+        scale: _isHovered ? 1.25 : 1.0,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutCubic,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: widget.isRenewal
+                ? widget.accentColor.withValues(alpha: 0.25)
+                : widget.textColor.withValues(alpha: 0.05),
+            border: Border.all(
+              color: widget.isRenewal || _isHovered
+                  ? widget.accentColor.withValues(alpha: _isHovered ? 1.0 : 0.6)
+                  : Colors.transparent,
+              width: AppGlassStyle.borderWidth,
+            ),
+            boxShadow: _isHovered && widget.isRenewal
+                ? [
+                    BoxShadow(
+                      color: widget.accentColor.withValues(alpha: 0.7),
+                      blurRadius: 12,
+                      spreadRadius: 2,
+                    )
+                  ]
+                : [],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '${widget.day}',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: widget.isRenewal || _isHovered
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  color: widget.isRenewal || _isHovered
+                      ? widget.accentColor
+                      : widget.textColor.withValues(alpha: 0.5),
+                ),
+              ),
+              if (widget.isRenewal) ...[
+                const SizedBox(height: 1),
+                Container(
+                  width: 4,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: widget.accentColor,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

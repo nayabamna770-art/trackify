@@ -1,28 +1,69 @@
 import 'package:equatable/equatable.dart';
-import '../../app/constants/app_colors.dart';
-import '../../app/constants/app_glass_style.dart';
+import 'package:flutter/material.dart';
+
+class ThemePalette extends Equatable {
+  final String id;
+  final String name;
+  final Color background;
+  final Color surfaceGlass;
+  final Color accentPrimary;
+  final Color accentSecondary;
+  final Color textPrimary;
+  final Color textHeading;
+
+  const ThemePalette({
+    required this.id,
+    required this.name,
+    required this.background,
+    required this.surfaceGlass,
+    required this.accentPrimary,
+    required this.accentSecondary,
+    required this.textPrimary,
+    required this.textHeading,
+  });
+
+  @override
+  List<Object?> get props => [
+        id,
+        name,
+        background,
+        surfaceGlass,
+        accentPrimary,
+        accentSecondary,
+        textPrimary,
+        textHeading,
+      ];
+}
+
+class ThemeGroup {
+  final String groupName;
+  final List<ThemePalette> palettes;
+
+  const ThemeGroup({
+    required this.groupName,
+    required this.palettes,
+  });
+}
 
 class ThemeState extends Equatable {
-  final AppPalette palette;
+  final ThemePalette currentPalette;
   final double glassOpacity;
 
   const ThemeState({
-    this.palette = AppPalette.tokyoNight,
-    this.glassOpacity = AppGlassStyle.defaultOpacity,
+    required this.currentPalette,
+    this.glassOpacity = 0.18,
   });
 
-  AppPaletteData get currentPalette => AppColors.getPalette(palette);
-
   ThemeState copyWith({
-    AppPalette? palette,
+    ThemePalette? currentPalette,
     double? glassOpacity,
   }) {
     return ThemeState(
-      palette: palette ?? this.palette,
+      currentPalette: currentPalette ?? this.currentPalette,
       glassOpacity: glassOpacity ?? this.glassOpacity,
     );
   }
 
   @override
-  List<Object?> get props => [palette, glassOpacity];
+  List<Object?> get props => [currentPalette, glassOpacity];
 }

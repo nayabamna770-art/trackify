@@ -6,6 +6,7 @@ import 'package:trackify/core/widgets/floating_frosted_navbar.dart';
 import 'package:trackify/core/widgets/glass_container.dart';
 import 'package:trackify/core/widgets/glow_orb.dart';
 import 'package:trackify/core/widgets/spring_scale_button.dart';
+import 'package:trackify/features/dashboard/presentation/pages/dashboard_screen.dart';
 
 class MainScreenShell extends StatefulWidget {
   const MainScreenShell({super.key});
@@ -18,7 +19,7 @@ class _MainScreenShellState extends State<MainScreenShell> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = const [
-    Center(child: Text('Dashboard Screen', style: TextStyle(fontSize: 18))),
+    DashboardScreen(),
     Center(child: Text('Habit Screen', style: TextStyle(fontSize: 18))),
     Center(child: Text('Subscription Screen', style: TextStyle(fontSize: 18))),
   ];

@@ -5,7 +5,7 @@ import 'package:trackify/core/theme/theme_cubit.dart';
 import 'package:trackify/core/theme/theme_state.dart';
 import 'package:trackify/core/widgets/glass_container.dart';
 import 'package:trackify/core/widgets/glow_orb.dart';
-import '../main_screen_shell.dart';
+import 'main_screen_shell.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../app/constants/app_glass_style.dart';
-import '../../../../core/theme/theme_cubit.dart';
-import '../../../../core/theme/theme_state.dart';
-import '../../../../core/widgets/glass_container.dart';
-import '../../../../core/widgets/glow_orb.dart';
+import 'package:trackify/app/constants/app_glass_style.dart';
+import 'package:trackify/core/theme/theme_cubit.dart';
+import 'package:trackify/core/theme/theme_state.dart';
+import 'package:trackify/core/widgets/glass_container.dart';
+import 'package:trackify/core/widgets/glow_orb.dart';
+import '../main_screen_shell.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -32,10 +33,26 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _scaleAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.outBack),
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
     );
 
     _controller.forward();
+
+    Future.delayed(const Duration(milliseconds: 2200), () {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            transitionDuration: const Duration(milliseconds: 600),
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const MainScreenShell(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          ),
+        );
+      }
+    });
   }
 
   @override
@@ -53,7 +70,6 @@ class _SplashScreenState extends State<SplashScreen>
         return Scaffold(
           body: Stack(
             children: [
-              // Background floating gradient glow orbs
               Positioned(
                 top: -40,
                 left: -30,
@@ -72,8 +88,6 @@ class _SplashScreenState extends State<SplashScreen>
                   opacity: 0.35,
                 ),
               ),
-
-              // Centered Frosted Glass Branding Card
               Center(
                 child: FadeTransition(
                   opacity: _fadeAnimation,
@@ -92,9 +106,11 @@ class _SplashScreenState extends State<SplashScreen>
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: palette.accentPrimary.withValues(alpha: 0.15),
+                              color: palette.accentPrimary
+                                  .withValues(alpha: 0.15),
                               border: Border.all(
-                                color: palette.accentPrimary.withValues(alpha: 0.4),
+                                color: palette.accentPrimary
+                                    .withValues(alpha: 0.4),
                                 width: AppGlassStyle.borderWidth,
                               ),
                             ),
@@ -120,7 +136,8 @@ class _SplashScreenState extends State<SplashScreen>
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w400,
-                              color: palette.textPrimary.withValues(alpha: 0.8),
+                              color:
+                                  palette.textPrimary.withValues(alpha: 0.8),
                             ),
                           ),
                         ],

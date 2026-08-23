@@ -10,6 +10,8 @@ class HabitModel extends Equatable {
   final bool isCompletedToday;
   final List<bool> weeklyProgress;
   final int defaultTimerMinutes;
+  final String? linkedSubscriptionId;
+  final String? linkedSubscriptionName;
 
   const HabitModel({
     required this.id,
@@ -20,6 +22,8 @@ class HabitModel extends Equatable {
     required this.isCompletedToday,
     required this.weeklyProgress,
     this.defaultTimerMinutes = 25,
+    this.linkedSubscriptionId,
+    this.linkedSubscriptionName,
   });
 
   HabitModel copyWith({
@@ -31,6 +35,8 @@ class HabitModel extends Equatable {
     bool? isCompletedToday,
     List<bool>? weeklyProgress,
     int? defaultTimerMinutes,
+    String? linkedSubscriptionId,
+    String? linkedSubscriptionName,
   }) {
     return HabitModel(
       id: id ?? this.id,
@@ -41,6 +47,9 @@ class HabitModel extends Equatable {
       isCompletedToday: isCompletedToday ?? this.isCompletedToday,
       weeklyProgress: weeklyProgress ?? this.weeklyProgress,
       defaultTimerMinutes: defaultTimerMinutes ?? this.defaultTimerMinutes,
+      linkedSubscriptionId: linkedSubscriptionId ?? this.linkedSubscriptionId,
+      linkedSubscriptionName:
+          linkedSubscriptionName ?? this.linkedSubscriptionName,
     );
   }
 
@@ -54,5 +63,7 @@ class HabitModel extends Equatable {
         isCompletedToday,
         weeklyProgress,
         defaultTimerMinutes,
+        linkedSubscriptionId,
+        linkedSubscriptionName,
       ];
 }

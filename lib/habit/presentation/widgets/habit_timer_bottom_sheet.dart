@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:trackify/core/widgets/glass_container.dart';
+import 'package:trackify/core/widgets/spring_scale_button.dart';
 import 'package:trackify/habit/domains/models/habit_model.dart';
 
 class HabitTimerBottomSheet extends StatefulWidget {
@@ -23,7 +24,7 @@ class HabitTimerBottomSheet extends StatefulWidget {
 }
 
 class _HabitTimerBottomSheetState extends State<HabitTimerBottomSheet> {
-  late int _selectedMinutes;
+  late int _targetMinutes;
   late int _secondsRemaining;
   Timer? _timer;
   bool _isRunning = false;
@@ -31,8 +32,8 @@ class _HabitTimerBottomSheetState extends State<HabitTimerBottomSheet> {
   @override
   void initState() {
     super.initState();
-    _selectedMinutes = widget.habit.defaultTimerMinutes;
-    _secondsRemaining = _selectedMinutes * 60;
+    _targetMinutes = widget.habit.defaultTimerMinutes;
+    _secondsRemaining = _targetMinutes * 60;
   }
 
   @override
@@ -41,31 +42,33 @@ class _HabitTimerBottomSheetState extends State<HabitTimerBottomSheet> {
     super.dispose();
   }
 
-  void _startTimer() {
-    setState(() => _isRunning = true);
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_secondsRemaining > 0) {
-        setState(() => _secondsRemaining--);
-      } else {
-        _timer?.cancel();
-        setState(() => _isRunning = false);
-        HapticFeedback.vibrate();
-        widget.onTimerCompleted();
-        Navigator.pop(context);
-      }
-    });
-  }
-
-  void _pauseTimer() {
-    _timer?.cancel();
-    setState(() => _isRunning = false);
+  void _toggleTimer() {
+    HapticFeedback.selectionClick();
+    if (_isRunning) {
+      _timer?.cancel();
+      setState(() => _isRunning = false);
+    } else {
+      setState(() => _isRunning = true);
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (_secondsRemaining > 0) {
+          setState(() => _secondsRemaining--);
+        } else {
+          _timer?.cancel();
+          setState(() => _isRunning = false);
+          HapticFeedback.vibrate();
+          widget.onTimerCompleted();
+          Navigator.pop(context);
+        }
+      });
+    }
   }
 
   void _resetTimer() {
+    HapticFeedback.lightImpact();
     _timer?.cancel();
     setState(() {
       _isRunning = false;
-      _secondsRemaining = _selectedMinutes * 60;
+      _secondsRemaining = _targetMinutes * 60;
     });
   }
 
@@ -77,9 +80,10 @@ class _HabitTimerBottomSheetState extends State<HabitTimerBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final double progress = (_selectedMinutes * 60 == 0)
-        ? 0
-        : 1.0 - (_secondsRemaining / (_selectedMinutes * 60));
+    final palette = widget.palette;
+    final totalSecs = _targetMinutes * 60;
+    final double progress =
+        totalSecs == 0 ? 0.0 : 1.0 - (_secondsRemaining / totalSecs);
 
     return GlassContainer(
       borderRadius: 24,
@@ -93,93 +97,82 @@ class _HabitTimerBottomSheetState extends State<HabitTimerBottomSheet> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: widget.palette.textHeading,
+              color: palette.textHeading,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            'Active Focus Session',
+            'Target Timer Session (${_targetMinutes}m)',
             style: TextStyle(
               fontSize: 12,
-              color: widget.palette.textPrimary,
+              color: palette.textPrimary,
             ),
           ),
           const SizedBox(height: 24),
           Text(
             _formatTime(_secondsRemaining),
             style: TextStyle(
-              fontSize: 48,
+              fontSize: 52,
               fontWeight: FontWeight.w800,
               letterSpacing: 2,
-              color: widget.palette.accentPrimary,
+              color: palette.accentPrimary,
             ),
           ),
           const SizedBox(height: 16),
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: widget.palette.textPrimary.withValues(alpha: 0.1),
-            valueColor: AlwaysStoppedAnimation<Color>(widget.palette.accentPrimary),
-            minHeight: 6,
-            borderRadius: BorderRadius.circular(3),
-          ),
-          const SizedBox(height: 24),
-          if (!_isRunning && _secondsRemaining == _selectedMinutes * 60)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [15, 25, 45, 60].map((mins) {
-                final isSelected = _selectedMinutes == mins;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: FilterChip(
-                    label: Text('${mins}m'),
-                    selected: isSelected,
-                    selectedColor: widget.palette.accentPrimary.withValues(alpha: 0.2),
-                    checkmarkColor: widget.palette.accentPrimary,
-                    labelStyle: TextStyle(
-                      color: isSelected
-                          ? widget.palette.accentPrimary
-                          : widget.palette.textPrimary,
-                    ),
-                    onSelected: (selected) {
-                      if (selected) {
-                        setState(() {
-                          _selectedMinutes = mins;
-                          _secondsRemaining = mins * 60;
-                        });
-                      }
-                    },
-                  ),
-                );
-              }).toList(),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: palette.textPrimary.withValues(alpha: 0.1),
+              valueColor: AlwaysStoppedAnimation<Color>(palette.accentPrimary),
+              minHeight: 6,
             ),
-          const SizedBox(height: 24),
+          ),
+          const SizedBox(height: 32),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              IconButton(
-                onPressed: _resetTimer,
-                icon: Icon(Icons.refresh, color: widget.palette.textPrimary),
+              SpringScaleButton(
+                onTap: () => Navigator.pop(context),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: palette.textPrimary),
+                  ),
+                ),
               ),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: widget.palette.accentPrimary,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                  shape: RoundedRectangleBorder(
+              SpringScaleButton(
+                onTap: _toggleTimer,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 32, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: palette.accentPrimary,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                ),
-                onPressed: _isRunning ? _pauseTimer : _startTimer,
-                icon: Icon(
-                  _isRunning ? Icons.pause : Icons.play_arrow,
-                  color: Colors.black,
-                ),
-                label: Text(
-                  _isRunning ? 'Pause' : 'Start Focus',
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
+                  child: Row(
+                    children: [
+                      Icon(
+                        _isRunning ? Icons.pause : Icons.play_arrow,
+                        color: Colors.black,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        _isRunning ? 'Pause' : 'Start Timer',
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+              ),
+              IconButton(
+                onPressed: _resetTimer,
+                icon: Icon(Icons.refresh, color: palette.textPrimary),
               ),
             ],
           ),

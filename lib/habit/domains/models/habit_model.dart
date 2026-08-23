@@ -8,7 +8,8 @@ class HabitModel extends Equatable {
   final IconData icon;
   final int streakCount;
   final bool isCompletedToday;
-  final List<bool> weeklyProgress; // 7 days status
+  final List<bool> weeklyProgress;
+  final int defaultTimerMinutes;
 
   const HabitModel({
     required this.id,
@@ -18,6 +19,7 @@ class HabitModel extends Equatable {
     required this.streakCount,
     required this.isCompletedToday,
     required this.weeklyProgress,
+    this.defaultTimerMinutes = 25,
   });
 
   HabitModel copyWith({
@@ -28,6 +30,7 @@ class HabitModel extends Equatable {
     int? streakCount,
     bool? isCompletedToday,
     List<bool>? weeklyProgress,
+    int? defaultTimerMinutes,
   }) {
     return HabitModel(
       id: id ?? this.id,
@@ -37,6 +40,7 @@ class HabitModel extends Equatable {
       streakCount: streakCount ?? this.streakCount,
       isCompletedToday: isCompletedToday ?? this.isCompletedToday,
       weeklyProgress: weeklyProgress ?? this.weeklyProgress,
+      defaultTimerMinutes: defaultTimerMinutes ?? this.defaultTimerMinutes,
     );
   }
 
@@ -49,5 +53,6 @@ class HabitModel extends Equatable {
         streakCount,
         isCompletedToday,
         weeklyProgress,
+        defaultTimerMinutes,
       ];
 }

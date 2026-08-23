@@ -7,6 +7,7 @@ import 'package:trackify/core/widgets/glass_container.dart';
 import 'package:trackify/core/widgets/spring_scale_button.dart';
 import 'package:trackify/habit/bloc/habit_cubit.dart';
 import 'package:trackify/habit/domains/models/habit_model.dart';
+import 'package:trackify/habit/presentation/widgets/habit_timer_bottom_sheet.dart';
 
 class HabitsScreen extends StatelessWidget {
   const HabitsScreen({super.key});
@@ -127,6 +128,25 @@ class HabitsScreen extends StatelessWidget {
     );
   }
 
+  void _showTimerBottomSheet(BuildContext context, HabitModel habit,
+      dynamic palette, double opacity) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (bottomSheetContext) {
+        return HabitTimerBottomSheet(
+          habit: habit,
+          palette: palette,
+          opacity: opacity,
+          onTimerCompleted: () {
+            context.read<HabitCubit>().toggleHabitCompletion(habit.id);
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeCubit, ThemeState>(
@@ -142,7 +162,7 @@ class HabitsScreen extends StatelessWidget {
                   left: 20,
                   right: 20,
                   top: 10,
-                  bottom: 120, // Avoid overlapping with bottom navbar
+                  bottom: 120,
                 ),
                 children: [
                   Row(
@@ -207,6 +227,8 @@ class HabitsScreen extends StatelessWidget {
                           habit: habit,
                           palette: palette,
                           opacity: themeState.glassOpacity,
+                          onSetTimer: () => _showTimerBottomSheet(
+                              context, habit, palette, themeState.glassOpacity),
                         ),
                       )),
                 ],
@@ -223,11 +245,13 @@ class _HabitCardWidget extends StatefulWidget {
   final HabitModel habit;
   final dynamic palette;
   final double opacity;
+  final VoidCallback onSetTimer;
 
   const _HabitCardWidget({
     required this.habit,
     required this.palette,
     required this.opacity,
+    required this.onSetTimer,
   });
 
   @override
@@ -237,17 +261,9 @@ class _HabitCardWidget extends StatefulWidget {
 class _HabitCardWidgetState extends State<_HabitCardWidget> {
   double _scale = 1.0;
 
-  void _onTapDown(TapDownDetails details) {
-    setState(() => _scale = 0.97);
-  }
-
-  void _onTapUp(TapUpDetails details) {
-    setState(() => _scale = 1.0);
-  }
-
-  void _onTapCancel() {
-    setState(() => _scale = 1.0);
-  }
+  void _onTapDown(TapDownDetails details) => setState(() => _scale = 0.97);
+  void _onTapUp(TapUpDetails details) => setState(() => _scale = 1.0);
+  void _onTapCancel() => setState(() => _scale = 1.0);
 
   @override
   Widget build(BuildContext context) {
@@ -311,34 +327,71 @@ class _HabitCardWidgetState extends State<_HabitCardWidget> {
                       ),
                     ],
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      context
-                          .read<HabitCubit>()
-                          .toggleHabitCompletion(habit.id);
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: habit.isCompletedToday
-                            ? palette.accentPrimary
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: habit.isCompletedToday
-                              ? palette.accentPrimary
-                              : palette.textPrimary.withValues(alpha: 0.3),
-                          width: 2,
+                  Row(
+                    children: [
+                      // Set Timer Trigger Action Button
+                      SpringScaleButton(
+                        onTap: widget.onSetTimer,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: palette.accentPrimary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: palette.accentPrimary.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.timer_outlined,
+                                  size: 14, color: palette.accentPrimary),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Set Timer',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: palette.accentPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      child: habit.isCompletedToday
-                          ? const Icon(Icons.check,
-                              size: 18, color: Colors.black)
-                          : null,
-                    ),
+                      const SizedBox(width: 10),
+                      // Completion Toggle
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          context
+                              .read<HabitCubit>()
+                              .toggleHabitCompletion(habit.id);
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: habit.isCompletedToday
+                                ? palette.accentPrimary
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: habit.isCompletedToday
+                                  ? palette.accentPrimary
+                                  : palette.textPrimary.withValues(alpha: 0.3),
+                              width: 2,
+                            ),
+                          ),
+                          child: habit.isCompletedToday
+                              ? const Icon(Icons.check,
+                                  size: 18, color: Colors.black)
+                              : null,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

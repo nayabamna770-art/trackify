@@ -8,43 +8,90 @@ import 'package:trackify/core/widgets/spring_scale_button.dart';
 import 'package:trackify/habit/bloc/habit_cubit.dart';
 import 'package:trackify/habit/domains/models/habit_model.dart';
 import 'package:trackify/habit/presentation/widgets/add_habit_bottom_sheet.dart';
-import 'package:trackify/habit/presentation/widgets/habit_timer_bottom_sheet.dart';
+import 'package:trackify/habit/presentation/widgets/appreciation_card_dialog.dart';
+import 'package:trackify/habit/presentation/widgets/current_task_timer_bottom_sheet.dart';
 
 class HabitsScreen extends StatelessWidget {
   const HabitsScreen({super.key});
 
   void _showAddHabitModal(
       BuildContext context, dynamic palette, double opacity) {
-    showModalBottomSheet(
+    showGeneralDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return AddHabitBottomSheet(
-          palette: palette,
-          opacity: opacity,
-          onSave: (newHabit) {
-            context.read<HabitCubit>().addHabit(newHabit);
-          },
+      barrierDismissible: true,
+      barrierLabel: 'Add Habit',
+      barrierColor: Colors.black.withValues(alpha: 0.6),
+      transitionDuration: const Duration(milliseconds: 350),
+      pageBuilder: (dialogContext, animation, secondaryAnimation) {
+        return Center(
+          child: Material(
+            color: Colors.transparent,
+            child: AddHabitBottomSheet(
+              palette: palette,
+              opacity: opacity,
+              onSave: (newHabit) {
+                context.read<HabitCubit>().addHabit(newHabit);
+              },
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutBack,
+        );
+        return ScaleTransition(
+          scale: curvedAnimation,
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
         );
       },
     );
   }
 
-  void _showTimerModal(BuildContext context, HabitModel habit, dynamic palette,
-      double opacity) {
-    showModalBottomSheet(
+  void _showCurrentTaskTimerModal(
+      BuildContext context, dynamic palette, double opacity) {
+    showGeneralDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return HabitTimerBottomSheet(
-          habit: habit,
-          palette: palette,
-          opacity: opacity,
-          onTimerCompleted: () {
-            context.read<HabitCubit>().toggleHabitCompletion(habit.id);
-          },
+      barrierDismissible: false,
+      barrierLabel: 'Current Task Timer',
+      barrierColor: Colors.black.withValues(alpha: 0.6),
+      transitionDuration: const Duration(milliseconds: 350),
+      pageBuilder: (dialogContext, animation, secondaryAnimation) {
+        return Center(
+            child: Material(
+          color: Colors.transparent,
+          child: CurrentTaskTimerBottomSheet(
+            palette: palette,
+            opacity: opacity,
+            onTimerComplete: (taskTitle, durationMinutes) {
+              showDialog(
+                context: context,
+                builder: (dialogContext) => AppreciationCardDialog(
+                  taskTitle: taskTitle,
+                  minutes: durationMinutes,
+                  palette: palette,
+                  opacity: opacity,
+                ),
+              );
+            },
+          ),
+        ));
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutBack,
+        );
+        return ScaleTransition(
+          scale: curvedAnimation,
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
         );
       },
     );
@@ -95,6 +142,35 @@ class HabitsScreen extends StatelessWidget {
                       Row(
                         children: [
                           SpringScaleButton(
+                            onTap: () => _showCurrentTaskTimerModal(
+                                context, palette, themeState.glassOpacity),
+                            child: GlassContainer(
+                              borderRadius: 14,
+                              opacity: themeState.glassOpacity,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 12),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.timer_outlined,
+                                    color: palette.accentPrimary,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Task',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: palette.accentPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          SpringScaleButton(
                             onTap: () => _showAddHabitModal(
                                 context, palette, themeState.glassOpacity),
                             child: GlassContainer(
@@ -106,17 +182,6 @@ class HabitsScreen extends StatelessWidget {
                                 color: palette.accentPrimary,
                                 size: 20,
                               ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          GlassContainer(
-                            borderRadius: 14,
-                            opacity: themeState.glassOpacity,
-                            padding: const EdgeInsets.all(12),
-                            child: Icon(
-                              Icons.local_fire_department,
-                              color: palette.accentSecondary,
-                              size: 20,
                             ),
                           ),
                         ],
@@ -131,8 +196,6 @@ class HabitsScreen extends StatelessWidget {
                         habit: habit,
                         palette: palette,
                         opacity: themeState.glassOpacity,
-                        onSetTimer: () => _showTimerModal(
-                            context, habit, palette, themeState.glassOpacity),
                       ),
                     ),
                   ),
@@ -150,13 +213,11 @@ class _HabitCardWidget extends StatelessWidget {
   final HabitModel habit;
   final dynamic palette;
   final double opacity;
-  final VoidCallback onSetTimer;
 
   const _HabitCardWidget({
     required this.habit,
     required this.palette,
     required this.opacity,
-    required this.onSetTimer,
   });
 
   @override
@@ -228,69 +289,31 @@ class _HabitCardWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-                Row(
-                  children: [
-                    SpringScaleButton(
-                      onTap: onSetTimer,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: palette.accentPrimary.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: palette.accentPrimary.withValues(alpha: 0.3),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.timer_outlined,
-                                size: 14, color: palette.accentPrimary),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Set Timer',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: palette.accentPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    context.read<HabitCubit>().toggleHabitCompletion(habit.id);
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: habit.isCompletedToday
+                          ? palette.accentPrimary
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: habit.isCompletedToday
+                            ? palette.accentPrimary
+                            : palette.textPrimary.withValues(alpha: 0.3),
+                        width: 2,
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        context
-                            .read<HabitCubit>()
-                            .toggleHabitCompletion(habit.id);
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: habit.isCompletedToday
-                              ? palette.accentPrimary
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: habit.isCompletedToday
-                                ? palette.accentPrimary
-                                : palette.textPrimary.withValues(alpha: 0.3),
-                            width: 2,
-                          ),
-                        ),
-                        child: habit.isCompletedToday
-                            ? const Icon(Icons.check,
-                                size: 18, color: Colors.black)
-                            : null,
-                      ),
-                    ),
-                  ],
+                    child: habit.isCompletedToday
+                        ? const Icon(Icons.check, size: 18, color: Colors.black)
+                        : null,
+                  ),
                 ),
               ],
             ),

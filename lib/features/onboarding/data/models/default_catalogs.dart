@@ -70,23 +70,44 @@ class DefaultCatalogs {
     }
   }
 
-  static const List<SubscriptionModel> defaultSubscriptions = [
-    SubscriptionModel(
+  /// Default subscription items populated during role-based onboarding.
+  /// Dynamic renewal dates are generated relative to the current date.
+  static List<SubscriptionModel> get defaultSubscriptions {
+    final now = DateTime.now();
+    return [
+      SubscriptionModel(
         id: 's_leetcode',
         name: 'LeetCode Premium',
         cost: 35.0,
-        linkedHabitId: 'h_code'),
-    SubscriptionModel(
+        nextBillingDate: now.add(const Duration(days: 12)),
+        linkedHabitId: 'h_code',
+      ),
+      SubscriptionModel(
         id: 's_gym',
         name: 'Gym Membership',
         cost: 50.0,
-        linkedHabitId: 'h_gym'),
-    SubscriptionModel(
+        nextBillingDate: now.add(const Duration(days: 5)),
+        linkedHabitId: 'h_gym',
+      ),
+      SubscriptionModel(
         id: 's_coursera',
         name: 'Coursera Plus',
         cost: 49.0,
-        linkedHabitId: 'h_study'),
-    SubscriptionModel(id: 's_spotify', name: 'Spotify Premium', cost: 10.0),
-    SubscriptionModel(id: 's_netflix', name: 'Netflix', cost: 15.0),
-  ];
+        nextBillingDate: now.add(const Duration(days: 20)),
+        linkedHabitId: 'h_study',
+      ),
+      SubscriptionModel(
+        id: 's_spotify',
+        name: 'Spotify Premium',
+        cost: 10.0,
+        nextBillingDate: now.add(const Duration(days: 15)),
+      ),
+      SubscriptionModel(
+        id: 's_netflix',
+        name: 'Netflix',
+        cost: 15.0,
+        nextBillingDate: now.add(const Duration(days: 2)),
+      ),
+    ];
+  }
 }

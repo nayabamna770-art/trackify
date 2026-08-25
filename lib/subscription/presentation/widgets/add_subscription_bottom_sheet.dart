@@ -20,15 +20,18 @@ class AddSubscriptionBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<AddSubscriptionBottomSheet> createState() => _AddSubscriptionBottomSheetState();
+  State<AddSubscriptionBottomSheet> createState() =>
+      _AddSubscriptionBottomSheetState();
 }
 
-class _AddSubscriptionBottomSheetState extends State<AddSubscriptionBottomSheet> {
+class _AddSubscriptionBottomSheetState
+    extends State<AddSubscriptionBottomSheet> {
   final _nameController = TextEditingController();
   final _costController = TextEditingController();
   CurrencyType _selectedCurrency = CurrencyType.usd;
   final BillingCycle _selectedCycle = BillingCycle.monthly;
-  final DateTime _nextBillingDate = DateTime.now().add(const Duration(days: 30));
+  final DateTime _nextBillingDate =
+      DateTime.now().add(const Duration(days: 30));
   bool _isFreeTrial = false;
   HabitModel? _selectedHabit;
 
@@ -53,7 +56,8 @@ class _AddSubscriptionBottomSheetState extends State<AddSubscriptionBottomSheet>
             bottom: MediaQuery.of(context).viewInsets.bottom + 20,
           ),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: widget.glassOpacity.clamp(0.2, 0.8)),
+            color: Colors.black
+                .withValues(alpha: widget.glassOpacity.clamp(0.2, 0.8)),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
           ),
@@ -64,13 +68,17 @@ class _AddSubscriptionBottomSheetState extends State<AddSubscriptionBottomSheet>
               children: [
                 const Text(
                   'Track New Subscription',
-                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _nameController,
                   style: const TextStyle(color: Colors.white),
-                  decoration: _buildInputDecoration('Subscription Name (e.g., Netflix)'),
+                  decoration: _buildInputDecoration(
+                      'Subscription Name (e.g., Netflix)'),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -92,7 +100,8 @@ class _AddSubscriptionBottomSheetState extends State<AddSubscriptionBottomSheet>
                         return DropdownMenuItem(value: c, child: Text(c.code));
                       }).toList(),
                       onChanged: (val) {
-                        if (val != null) setState(() => _selectedCurrency = val);
+                        if (val != null)
+                          setState(() => _selectedCurrency = val);
                       },
                     ),
                   ],
@@ -116,7 +125,8 @@ class _AddSubscriptionBottomSheetState extends State<AddSubscriptionBottomSheet>
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                            border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.2)),
                           ),
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton<HabitModel>(
@@ -124,14 +134,18 @@ class _AddSubscriptionBottomSheetState extends State<AddSubscriptionBottomSheet>
                               isExpanded: true,
                               hint: Text(
                                 'Select Habit',
-                                style: TextStyle(color: Colors.white.withValues(alpha: 0.45)),
+                                style: TextStyle(
+                                    color:
+                                        Colors.white.withValues(alpha: 0.45)),
                               ),
                               dropdownColor: Colors.grey[900],
                               style: const TextStyle(color: Colors.white),
                               items: habits.map((h) {
-                                return DropdownMenuItem(value: h, child: Text(h.title));
+                                return DropdownMenuItem(
+                                    value: h, child: Text(h.title));
                               }).toList(),
-                              onChanged: (val) => setState(() => _selectedHabit = val),
+                              onChanged: (val) =>
+                                  setState(() => _selectedHabit = val),
                             ),
                           ),
                         ),
@@ -143,11 +157,14 @@ class _AddSubscriptionBottomSheetState extends State<AddSubscriptionBottomSheet>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Free Trial', style: TextStyle(color: Colors.white)),
+                    const Text('Free Trial',
+                        style: TextStyle(color: Colors.white)),
                     Switch(
                       value: _isFreeTrial,
-                      activeTrackColor: widget.primaryAccent.withValues(alpha: 0.5),
-                      thumbColor: WidgetStateProperty.all(widget.primaryAccent),
+                      activeTrackColor:
+                          widget.primaryAccent.withValues(alpha: 0.5),
+                      thumbColor:
+                          WidgetStateProperty.all(widget.primaryAccent),
                       onChanged: (val) => setState(() => _isFreeTrial = val),
                     ),
                   ],
@@ -159,12 +176,14 @@ class _AddSubscriptionBottomSheetState extends State<AddSubscriptionBottomSheet>
                     style: ElevatedButton.styleFrom(
                       backgroundColor: widget.primaryAccent,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
                     ),
                     onPressed: _submit,
                     child: const Text(
                       'Save Subscription',
-                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),

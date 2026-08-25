@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trackify/habit/bloc/habit_cubit.dart';
 
 import '../../../../core/theme/theme_cubit.dart';
 import '../../../../core/theme/theme_state.dart';
@@ -232,18 +233,23 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     double glassOpacity,
   ) {
     final cubit = context.read<SubscriptionCubit>();
+    final habitCubit = context.read<HabitCubit>();
+
     showDialog(
       context: context,
       barrierDismissible: true,
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        child: AddSubscriptionBottomSheet(
-          primaryAccent: primaryAccent,
-          glassOpacity: glassOpacity,
-          onSave: (SubscriptionModel newSub) {
-            cubit.addSubscription(newSub);
-          },
+        child: BlocProvider.value(
+          value: habitCubit,
+          child: AddSubscriptionBottomSheet(
+            primaryAccent: primaryAccent,
+            glassOpacity: glassOpacity,
+            onSave: (SubscriptionModel newSub) {
+              cubit.addSubscription(newSub);
+            },
+          ),
         ),
       ),
     );

@@ -10,6 +10,7 @@ import 'package:trackify/core/widgets/theme_selection_bottom_sheet.dart';
 import 'package:trackify/features/dashboard/presentation/pages/dashboard_screen.dart';
 import 'package:trackify/habit/bloc/habit_cubit.dart';
 import 'package:trackify/habit/presentation/pages/habit_screen.dart';
+import 'package:trackify/settings/presentation/pages/setting_screen.dart';
 import 'package:trackify/subscription/presentation/pages/subscription_screen.dart';
 
 class MainScreenShell extends StatelessWidget {
@@ -90,7 +91,8 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                                 'Welcome Back 👋',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: palette.textPrimary.withValues(alpha: 0.7),
+                                  color: palette.textPrimary
+                                      .withValues(alpha: 0.7),
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -116,7 +118,8 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                                     builder: (sheetContext) {
                                       return BlocProvider.value(
                                         value: themeCubit,
-                                        child: const ThemeSelectionBottomSheet(),
+                                        child:
+                                            const ThemeSelectionBottomSheet(),
                                       );
                                     },
                                   );
@@ -135,10 +138,16 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                               const SizedBox(width: 10),
                               SpringScaleButton(
                                 onTap: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Settings Screen coming in next phase!'),
-                                      duration: Duration(seconds: 2),
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SettingsScreen(
+                                        primaryAccent: palette.accentPrimary,
+                                        glassOpacity: themeState.glassOpacity,
+                                        onOpacityChanged: (newOpacity) {
+                                          // Update opacity state via ThemeCubit if needed
+                                        },
+                                      ),
                                     ),
                                   );
                                 },
@@ -158,7 +167,12 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                         ],
                       ),
                     ),
-                    Expanded(child: _pages[_currentIndex]),
+                    Expanded(
+                      child: IndexedStack(
+                        index: _currentIndex,
+                        children: _pages,
+                      ),
+                    ),
                   ],
                 ),
               ),

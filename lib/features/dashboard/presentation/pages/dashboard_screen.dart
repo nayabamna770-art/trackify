@@ -4,6 +4,7 @@ import 'package:trackify/app/constants/app_glass_style.dart';
 import 'package:trackify/core/theme/theme_cubit.dart';
 import 'package:trackify/core/theme/theme_state.dart';
 import 'package:trackify/core/widgets/glass_container.dart';
+import 'package:trackify/settings/presentation/pages/setting_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -17,6 +18,41 @@ class DashboardScreen extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
           children: [
+            // --- TOP UTILITY ROW: SETTINGS ACTION BUTTON ---
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _HoverPopCard(
+                  child: GlassContainer(
+                    padding: const EdgeInsets.all(4),
+                    borderRadius: 16,
+                    opacity: themeState.glassOpacity,
+                    accentGlowColor: palette.accentPrimary,
+                    child: IconButton(
+                      icon: Icon(Icons.settings, color: palette.textHeading),
+                      tooltip: 'Open Settings',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SettingsScreen(
+                              primaryAccent: palette.accentPrimary,
+                              glassOpacity: themeState.glassOpacity,
+                              onOpacityChanged: (newOpacity) {
+                                // Dynamic opacity handler
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
             // --- TOP ROW: WELCOME & FIERY STREAK BADGE ---
             Row(
               children: [

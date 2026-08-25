@@ -38,6 +38,7 @@ class _AddHabitBottomSheetState extends State<AddHabitBottomSheet>
     'ChatGPT Plus',
     'GitHub Copilot'
   ];
+
   @override
   void initState() {
     super.initState();
@@ -67,12 +68,14 @@ class _AddHabitBottomSheetState extends State<AddHabitBottomSheet>
     return AnimatedBuilder(
       animation: _glowAnimation,
       builder: (context, child) {
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 24),
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: GlassContainer(
-            borderRadius: 24,
-            opacity: widget.opacity * _glowAnimation.value,
-            padding: const EdgeInsets.all(24),
+            opacity: widget.opacity,
+            borderRadius: 24.0,
+            padding: const EdgeInsets.all(20.0),
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -108,7 +111,8 @@ class _AddHabitBottomSheetState extends State<AddHabitBottomSheet>
                       labelStyle: TextStyle(color: palette.textPrimary),
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(
-                            color: palette.textPrimary.withValues(alpha: 0.3)),
+                          color: palette.textPrimary.withValues(alpha: 0.3),
+                        ),
                       ),
                       focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: palette.accentPrimary),
@@ -124,7 +128,8 @@ class _AddHabitBottomSheetState extends State<AddHabitBottomSheet>
                       labelStyle: TextStyle(color: palette.textPrimary),
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(
-                            color: palette.textPrimary.withValues(alpha: 0.3)),
+                          color: palette.textPrimary.withValues(alpha: 0.3),
+                        ),
                       ),
                       focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: palette.accentPrimary),
@@ -141,7 +146,8 @@ class _AddHabitBottomSheetState extends State<AddHabitBottomSheet>
                       labelStyle: TextStyle(color: palette.textPrimary),
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(
-                            color: palette.textPrimary.withValues(alpha: 0.3)),
+                          color: palette.textPrimary.withValues(alpha: 0.3),
+                        ),
                       ),
                       focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: palette.accentPrimary),
@@ -186,8 +192,10 @@ class _AddHabitBottomSheetState extends State<AddHabitBottomSheet>
                       items: _mockSubscriptions.map((sub) {
                         return DropdownMenuItem(
                           value: sub,
-                          child: Text(sub,
-                              style: TextStyle(color: palette.textHeading)),
+                          child: Text(
+                            sub,
+                            style: TextStyle(color: palette.textHeading),
+                          ),
                         );
                       }).toList(),
                       onChanged: (val) {
@@ -196,8 +204,8 @@ class _AddHabitBottomSheetState extends State<AddHabitBottomSheet>
                       decoration: InputDecoration(
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(
-                              color:
-                                  palette.textPrimary.withValues(alpha: 0.3)),
+                            color: palette.textPrimary.withValues(alpha: 0.3),
+                          ),
                         ),
                         focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: palette.accentPrimary),
@@ -209,11 +217,24 @@ class _AddHabitBottomSheetState extends State<AddHabitBottomSheet>
                   Row(
                     children: [
                       Expanded(
-                        child: TextButton(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            side: BorderSide(
+                              color: palette.textPrimary.withValues(alpha: 0.3),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                           onPressed: () => Navigator.pop(context),
                           child: Text(
                             'Cancel',
-                            style: TextStyle(color: palette.textPrimary),
+                            style: TextStyle(
+                              color: palette.textPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                       ),

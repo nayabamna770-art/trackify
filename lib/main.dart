@@ -3,13 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/theme/theme_cubit.dart';
 import 'core/theme/theme_state.dart';
+import 'features/onboarding/presentation/pages/splash_screen.dart'; // Import splash screen
 import 'subscription/data/repositories/subscription_repository.dart';
 import 'subscription/logic/subscription_cubit.dart';
 
-// Import your app shell page here
-// import 'subscription/presentation/pages/subscription_screen.dart';
-
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const TrackifyApp());
 }
 
@@ -26,7 +25,7 @@ class TrackifyApp extends StatelessWidget {
         BlocProvider<SubscriptionCubit>(
           create: (context) => SubscriptionCubit(
             repository: SubscriptionRepository(),
-          )..loadSubscriptions(),
+          ),
         ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
@@ -40,11 +39,7 @@ class TrackifyApp extends StatelessWidget {
               brightness: Brightness.dark,
               scaffoldBackgroundColor: palette.background,
             ),
-            home: const Scaffold(
-              body: Center(
-                child: Text('Trackify App'),
-              ),
-            ),
+            home: const SplashScreen(), // Starts at SplashScreen
           );
         },
       ),

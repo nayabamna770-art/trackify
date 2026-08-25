@@ -143,11 +143,14 @@ class SubscriptionCard extends StatelessWidget {
                                     Colors.orangeAccent.withValues(alpha: 0.5),
                               ),
                             ),
-                            child: Row(
+                            child: const Row(
                               mainAxisSize: MainAxisSize.min,
-                              children: const [
-                                Icon(Icons.warning_amber_rounded,
-                                    size: 13, color: Colors.orangeAccent),
+                              children: [
+                                Icon(
+                                  Icons.warning_amber_rounded,
+                                  size: 13,
+                                  color: Colors.orangeAccent,
+                                ),
                                 SizedBox(width: 4),
                                 Text(
                                   'Underutilized',

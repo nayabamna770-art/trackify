@@ -11,6 +11,7 @@ import 'package:trackify/features/dashboard/presentation/pages/dashboard_screen.
 import 'package:trackify/habit/bloc/habit_cubit.dart';
 import 'package:trackify/habit/presentation/pages/habit_screen.dart';
 import 'package:trackify/subscription/presentation/pages/subscription_screen.dart';
+
 class MainScreenShell extends StatelessWidget {
   const MainScreenShell({super.key});
 
@@ -41,6 +42,10 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final topPadding = mediaQuery.padding.top;
+    final bottomInset = mediaQuery.padding.bottom + 90;
+
     return BlocBuilder<ThemeCubit, ThemeState>(
       builder: (context, themeState) {
         final palette = themeState.currentPalette;
@@ -66,10 +71,10 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                   opacity: 0.30,
                 ),
               ),
-              SafeArea(
+              Padding(
+                padding: EdgeInsets.only(top: topPadding, bottom: bottomInset),
                 child: Column(
                   children: [
-                    // Consistent Shell Header across all views
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20.0,
@@ -85,8 +90,7 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                                 'Welcome Back 👋',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: palette.textPrimary
-                                      .withValues(alpha: 0.7),
+                                  color: palette.textPrimary.withValues(alpha: 0.7),
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -104,9 +108,7 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                             children: [
                               SpringScaleButton(
                                 onTap: () {
-                                  final themeCubit =
-                                      context.read<ThemeCubit>();
-
+                                  final themeCubit = context.read<ThemeCubit>();
                                   showModalBottomSheet(
                                     context: context,
                                     backgroundColor: Colors.transparent,
@@ -114,8 +116,7 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                                     builder: (sheetContext) {
                                       return BlocProvider.value(
                                         value: themeCubit,
-                                        child:
-                                            const ThemeSelectionBottomSheet(),
+                                        child: const ThemeSelectionBottomSheet(),
                                       );
                                     },
                                   );
@@ -133,7 +134,14 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                               ),
                               const SizedBox(width: 10),
                               SpringScaleButton(
-                                onTap: () {},
+                                onTap: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Settings Screen coming in next phase!'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
                                 child: GlassContainer(
                                   padding: const EdgeInsets.all(10),
                                   borderRadius: 14,

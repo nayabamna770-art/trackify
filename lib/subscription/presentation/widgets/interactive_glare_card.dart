@@ -1,11 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
-/// Advanced UX Component: Interactive 3D Glare Card.
-///
-/// CONCEPT: Tracks local touch drag coordinates to apply dynamic 3D perspective rotation
-/// via [Matrix4] alongside a moving [RadialGradient] highlight. This produces a photorealistic
-/// light glare effect over frosted glass without extra external rendering packages.
+/// Advanced UX Component: Interactive 3D Glare Card optimized for mobile touch sensors.
 class InteractiveGlareCard extends StatefulWidget {
   final Widget child;
   final double glassOpacity;
@@ -26,13 +22,13 @@ class InteractiveGlareCard extends StatefulWidget {
 
 class _InteractiveGlareCardState extends State<InteractiveGlareCard> {
   Offset _touchPosition = Offset.zero;
-  bool _isHovered = false;
+  bool _isTouching = false;
 
   @override
   Widget build(BuildContext context) {
     return Listener(
-      onPointerDown: (event) => _updateTouch(event.localPosition, isHovered: true),
-      onPointerMove: (event) => _updateTouch(event.localPosition, isHovered: true),
+      onPointerDown: (event) => _updateTouch(event.localPosition, isTouching: true),
+      onPointerMove: (event) => _updateTouch(event.localPosition, isTouching: true),
       onPointerUp: (_) => _resetTouch(),
       onPointerCancel: (_) => _resetTouch(),
       child: LayoutBuilder(
@@ -40,17 +36,16 @@ class _InteractiveGlareCardState extends State<InteractiveGlareCard> {
           final width = constraints.maxWidth;
           final height = constraints.maxHeight;
 
-          // Normalize touch points between -1.0 and 1.0 for perspective matrix math
-          final dx = _isHovered ? (_touchPosition.dx / width) - 0.5 : 0.0;
-          final dy = _isHovered ? (_touchPosition.dy / height) - 0.5 : 0.0;
+          final dx = _isTouching ? (_touchPosition.dx / width) - 0.5 : 0.0;
+          final dy = _isTouching ? (_touchPosition.dy / height) - 0.5 : 0.0;
 
           return AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
+            duration: const Duration(milliseconds: 50),
             curve: Curves.easeOutCubic,
             transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.001) // Perspective depth parameter
-              ..rotateX(-dy * 0.15) // Micro tilt X axis
-              ..rotateY(dx * 0.15), // Micro tilt Y axis
+              ..setEntry(3, 2, 0.001)
+              ..rotateX(-dy * 0.12)
+              ..rotateY(dx * 0.12),
             transformAlignment: Alignment.center,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(widget.borderRadius),
@@ -68,8 +63,7 @@ class _InteractiveGlareCardState extends State<InteractiveGlareCard> {
                   child: Stack(
                     children: [
                       widget.child,
-                      // Specular light reflection layer
-                      if (_isHovered)
+                      if (_isTouching)
                         Positioned.fill(
                           child: IgnorePointer(
                             child: Container(
@@ -77,9 +71,9 @@ class _InteractiveGlareCardState extends State<InteractiveGlareCard> {
                                 borderRadius: BorderRadius.circular(widget.borderRadius),
                                 gradient: RadialGradient(
                                   center: Alignment(dx * 2, dy * 2),
-                                  radius: 0.8,
+                                  radius: 0.85,
                                   colors: [
-                                    widget.primaryAccent.withValues(alpha: 0.25),
+                                    widget.primaryAccent.withValues(alpha: 0.30),
                                     Colors.transparent,
                                   ],
                                 ),
@@ -98,16 +92,16 @@ class _InteractiveGlareCardState extends State<InteractiveGlareCard> {
     );
   }
 
-  void _updateTouch(Offset pos, {required bool isHovered}) {
+  void _updateTouch(Offset pos, {required bool isTouching}) {
     setState(() {
       _touchPosition = pos;
-      _isHovered = isHovered;
+      _isTouching = isTouching;
     });
   }
 
   void _resetTouch() {
     setState(() {
-      _isHovered = false;
+      _isTouching = false;
       _touchPosition = Offset.zero;
     });
   }

@@ -1,8 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../habit/domains/models/habit_model.dart';
+
+///ort '../../habit/domains/models/habit_model.dart';
 import '../data/models/subscription_model.dart';
 import '../data/repositories/subscription_repository.dart';
 import 'subscription_state.dart';
+import 'package:trackify/habit/domains/models/habit_model.dart';
 
 class SubscriptionCubit extends Cubit<SubscriptionState> {
   final SubscriptionRepository? repository;
@@ -37,7 +39,8 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
 
       if (matchingHabit == null) return sub;
 
-      final isLowUsage = matchingHabit.streakCount == 0 && !matchingHabit.isCompletedToday;
+      final isLowUsage =
+          matchingHabit.streakCount == 0 && !matchingHabit.isCompletedToday;
 
       return sub.copyWith(
         linkedHabitName: matchingHabit.title,
@@ -65,8 +68,9 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
           : const Duration(days: 365),
     );
     final updated = sub.copyWith(nextBillingDate: updatedDate);
-    
-    final list = state.subscriptions.map((s) => s.id == sub.id ? updated : s).toList();
+
+    final list =
+        state.subscriptions.map((s) => s.id == sub.id ? updated : s).toList();
     emit(state.copyWith(subscriptions: list));
   }
 }

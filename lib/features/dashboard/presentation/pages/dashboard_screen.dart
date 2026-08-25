@@ -204,9 +204,8 @@ class DashboardScreen extends StatelessWidget {
     required Color accentColor,
     required Color textColor,
   }) {
-    final daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-    final mockActivity = [
+    const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const mockActivity = [
       [3, 4, 2, 4, 1],
       [2, 3, 4, 1, 4],
       [4, 4, 3, 2, 3],
@@ -263,11 +262,11 @@ class DashboardScreen extends StatelessWidget {
     required Color accentColor,
     required Color textColor,
   }) {
-    final activeRenewalDays = {
+    const activeRenewalDays = {
       5: '\$14',
       14: '\$9.99',
       21: '\$12',
-      28: '\$4.99'
+      28: '\$4.99',
     };
 
     return GlassContainer(
@@ -299,7 +298,6 @@ class DashboardScreen extends StatelessWidget {
   }
 }
 
-// --- HOVER WRAPPER FOR MAIN CARDS ---
 class _HoverPopCard extends StatefulWidget {
   final Widget child;
   const _HoverPopCard({required this.child});
@@ -326,7 +324,6 @@ class _HoverPopCardState extends State<_HoverPopCard> {
   }
 }
 
-// --- HOVER HEATMAP CELL ---
 class _HoverHeatmapCell extends StatefulWidget {
   final int intensity;
   final Color accentColor;
@@ -353,7 +350,7 @@ class _HoverHeatmapCellState extends State<_HoverHeatmapCell> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedScale(
-        scale: _isHovered ? 1.4 : 1.0,
+        scale: _isHovered ? 1.35 : 1.0,
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeOutCubic,
         child: AnimatedContainer(
@@ -387,7 +384,6 @@ class _HoverHeatmapCellState extends State<_HoverHeatmapCell> {
   }
 }
 
-// --- HOVER SUBSCRIPTION CELL ---
 class _HoverSubscriptionCell extends StatefulWidget {
   final int day;
   final bool isRenewal;
@@ -414,7 +410,7 @@ class _HoverSubscriptionCellState extends State<_HoverSubscriptionCell> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedScale(
-        scale: _isHovered ? 1.25 : 1.0,
+        scale: _isHovered ? 1.2 : 1.0,
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeOutCubic,
         child: AnimatedContainer(

@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../domains/models/habit_model.dart';
+import '../../subscription/logic/subscription_cubit.dart';
 
 class HabitState extends Equatable {
   final List<HabitModel> habits;
@@ -13,7 +14,9 @@ class HabitState extends Equatable {
 }
 
 class HabitCubit extends Cubit<HabitState> {
-  HabitCubit()
+  final SubscriptionCubit? subscriptionCubit;
+
+  HabitCubit({this.subscriptionCubit})
       : super(const HabitState(
           habits: [
             HabitModel(
@@ -52,16 +55,25 @@ class HabitCubit extends Cubit<HabitState> {
         final newStatus = !habit.isCompletedToday;
         return habit.copyWith(
           isCompletedToday: newStatus,
-          streakCount: newStatus ? habit.streakCount + 1 : (habit.streakCount > 0 ? habit.streakCount - 1 : 0),
+          streakCount: newStatus
+              ? habit.streakCount + 1
+              : (habit.streakCount > 0 ? habit.streakCount - 1 : 0),
         );
       }
       return habit;
     }).toList();
 
     emit(HabitState(habits: updatedHabits));
+    _syncSubscriptions(updatedHabits);
   }
 
   void addHabit(HabitModel newHabit) {
-    emit(HabitState(habits: [...state.habits, newHabit]));
+    final updatedHabits = [...state.habits, newHabit];
+    emit(HabitState(habits: updatedHabits));
+    _syncSubscriptions(updatedHabits);
+  }
+
+  void _syncSubscriptions(List<HabitModel> habits) {
+    subscriptionCubit?.syncWithHabits(habits);
   }
 }

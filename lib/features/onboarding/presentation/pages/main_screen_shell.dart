@@ -10,7 +10,7 @@ import 'package:trackify/core/widgets/theme_selection_bottom_sheet.dart';
 import 'package:trackify/features/dashboard/presentation/pages/dashboard_screen.dart';
 import 'package:trackify/habit/bloc/habit_cubit.dart';
 import 'package:trackify/habit/presentation/pages/habit_screen.dart';
-
+import 'package:trackify/subscription/presentation/pages/subscription_screen.dart';
 class MainScreenShell extends StatelessWidget {
   const MainScreenShell({super.key});
 
@@ -36,7 +36,7 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
   final List<Widget> _pages = const [
     DashboardScreen(),
     HabitsScreen(),
-    Center(child: Text('Subscription Screen', style: TextStyle(fontSize: 18))),
+    SubscriptionScreen(),
   ];
 
   @override

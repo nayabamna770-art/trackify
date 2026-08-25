@@ -3,7 +3,8 @@ import '../../data/models/currency_type.dart';
 import '../../data/models/subscription_model.dart';
 import 'interactive_glare_card.dart';
 
-/// Presentation card displaying subscription specifics, status badge, and renewal trigger.
+/// Presentation card displaying subscription specifics, status badge,
+/// linked habit indicators, and underutilization warnings.
 class SubscriptionCard extends StatelessWidget {
   final SubscriptionModel subscription;
   final Color primaryAccent;
@@ -63,7 +64,8 @@ class SubscriptionCard extends StatelessWidget {
                   ),
                   // Dynamic Neon Status Badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       color: isUrgent
                           ? Colors.amber.withValues(alpha: 0.2)
@@ -76,7 +78,9 @@ class SubscriptionCard extends StatelessWidget {
                     ),
                     child: Text(
                       isUrgent
-                          ? (daysLeft <= 0 ? 'Renews Today' : 'Ends in $daysLeft d')
+                          ? (daysLeft <= 0
+                              ? 'Renews Today'
+                              : 'Ends in $daysLeft d')
                           : '$daysLeft Days Left',
                       style: TextStyle(
                         color: isUrgent ? Colors.amber : primaryAccent,
@@ -91,28 +95,85 @@ class SubscriptionCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if (subscription.hasLinkedHabit)
-                    Row(
-                      children: const [
-                        Icon(Icons.link, size: 14, color: Colors.cyanAccent),
-                        SizedBox(width: 4),
-                        Text(
-                          'Linked to Habit',
-                          style: TextStyle(color: Colors.cyanAccent, fontSize: 11),
-                        ),
+                  Expanded(
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        if (subscription.hasLinkedHabit)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.cyanAccent.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Colors.cyanAccent.withValues(alpha: 0.4),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.link,
+                                    size: 13, color: Colors.cyanAccent),
+                                const SizedBox(width: 4),
+                                Text(
+                                  subscription.linkedHabitName != null
+                                      ? 'Linked: ${subscription.linkedHabitName}'
+                                      : 'Linked to Habit',
+                                  style: const TextStyle(
+                                    color: Colors.cyanAccent,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (subscription.isUnderutilized)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color:
+                                  Colors.orangeAccent.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color:
+                                    Colors.orangeAccent.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Icon(Icons.warning_amber_rounded,
+                                    size: 13, color: Colors.orangeAccent),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Underutilized',
+                                  style: TextStyle(
+                                    color: Colors.orangeAccent,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                       ],
-                    )
-                  else
-                    const SizedBox.shrink(),
+                    ),
+                  ),
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.autorenew, color: Colors.white70, size: 20),
+                        icon: const Icon(Icons.autorenew,
+                            color: Colors.white70, size: 20),
                         onPressed: onRenew,
                         tooltip: 'Quick Renew 1 Cycle',
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                        icon: const Icon(Icons.delete_outline,
+                            color: Colors.redAccent, size: 20),
                         onPressed: onDelete,
                         tooltip: 'Remove',
                       ),

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-//import 'app/constants/app_colors.dart';
+
 import 'core/theme/theme_cubit.dart';
 import 'core/theme/theme_state.dart';
-import 'features/onboarding/presentation/pages/splash_screen.dart';
+import 'subscription/data/repositories/subscription_repository.dart';
+import 'subscription/logic/subscription_cubit.dart';
+
+// Import your app shell page here
+// import 'subscription/presentation/pages/subscription_screen.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
   runApp(const TrackifyApp());
 }
 
@@ -15,8 +18,17 @@ class TrackifyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ThemeCubit(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ThemeCubit>(
+          create: (context) => ThemeCubit(),
+        ),
+        BlocProvider<SubscriptionCubit>(
+          create: (context) => SubscriptionCubit(
+            repository: SubscriptionRepository(),
+          )..loadSubscriptions(),
+        ),
+      ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, themeState) {
           final palette = themeState.currentPalette;
@@ -27,10 +39,12 @@ class TrackifyApp extends StatelessWidget {
             theme: ThemeData(
               brightness: Brightness.dark,
               scaffoldBackgroundColor: palette.background,
-              primaryColor: palette.accentPrimary,
-              fontFamily: 'Inter',
             ),
-            home: const SplashScreen(),
+            home: const Scaffold(
+              body: Center(
+                child: Text('Trackify App'),
+              ),
+            ),
           );
         },
       ),

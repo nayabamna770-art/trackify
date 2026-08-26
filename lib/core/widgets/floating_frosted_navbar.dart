@@ -9,6 +9,7 @@ class FloatingFrostedNavbar extends StatelessWidget {
   final double glassOpacity;
   final Color activeColor;
   final Color inactiveColor;
+  final List<Map<String, dynamic>>? items;
 
   const FloatingFrostedNavbar({
     super.key,
@@ -17,15 +18,17 @@ class FloatingFrostedNavbar extends StatelessWidget {
     required this.glassOpacity,
     required this.activeColor,
     required this.inactiveColor,
+    this.items,
   });
 
   @override
   Widget build(BuildContext context) {
-    final items = [
-      {'icon': Icons.grid_view_rounded, 'label': 'Dashboard'},
-      {'icon': Icons.repeat_rounded, 'label': 'Habits'},
-      {'icon': Icons.card_membership_rounded, 'label': 'Subscriptions'},
-    ];
+    final navItems = items ??
+        [
+          {'icon': Icons.grid_view_rounded, 'label': 'Dashboard'},
+          {'icon': Icons.repeat_rounded, 'label': 'Habits'},
+          {'icon': Icons.card_membership_rounded, 'label': 'Subscriptions'},
+        ];
 
     return Padding(
       padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 24.0),
@@ -36,7 +39,7 @@ class FloatingFrostedNavbar extends StatelessWidget {
         accentGlowColor: activeColor,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(items.length, (index) {
+          children: List.generate(navItems.length, (index) {
             final isSelected = currentIndex == index;
             final itemColor = isSelected ? activeColor : inactiveColor;
 
@@ -64,14 +67,14 @@ class FloatingFrostedNavbar extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(
-                      items[index]['icon'] as IconData,
+                      navItems[index]['icon'] as IconData,
                       color: itemColor,
                       size: 22,
                     ),
                     if (isSelected) ...[
                       const SizedBox(width: 8),
                       Text(
-                        items[index]['label'] as String,
+                        navItems[index]['label'] as String,
                         style: TextStyle(
                           color: itemColor,
                           fontSize: 13,

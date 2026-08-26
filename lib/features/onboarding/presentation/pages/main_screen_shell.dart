@@ -9,6 +9,7 @@ import 'package:trackify/core/widgets/spring_scale_button.dart';
 import 'package:trackify/core/widgets/theme_selection_bottom_sheet.dart';
 import 'package:trackify/features/dashboard/presentation/pages/dashboard_screen.dart';
 import 'package:trackify/habit/bloc/habit_cubit.dart';
+import 'package:trackify/habit/data/habit_repository.dart';
 import 'package:trackify/habit/presentation/pages/habit_screen.dart';
 import 'package:trackify/settings/presentation/pages/setting_screen.dart';
 import 'package:trackify/subscription/presentation/pages/subscription_screen.dart';
@@ -19,7 +20,7 @@ class MainScreenShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => HabitCubit(),
+      create: (context) => HabitCubit(repository: HabitRepository())..loadHabits(),
       child: const _MainScreenShellView(),
     );
   }
@@ -177,6 +178,11 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                   glassOpacity: themeState.glassOpacity,
                   activeColor: palette.accentPrimary,
                   inactiveColor: palette.textPrimary.withValues(alpha: 0.6),
+                  items: const [
+                    {'icon': Icons.grid_view_rounded, 'label': 'Dashboard'},
+                    {'icon': Icons.repeat_rounded, 'label': 'Habits'},
+                    {'icon': Icons.card_membership_rounded, 'label': 'Subscriptions'},
+                  ],
                   onTap: (index) {
                     setState(() {
                       _currentIndex = index;

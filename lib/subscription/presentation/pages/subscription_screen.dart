@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:trackify/habit/bloc/habit_cubit.dart';
 
-import '../../../../core/theme/theme_cubit.dart';
+import '../../../../core/theme/logic/theme_cubit.dart';
 import '../../../../core/theme/theme_state.dart';
 import '../../../../core/widgets/spring_scale_button.dart';
+import '../../../habit/bloc/habit_cubit.dart';
 import '../../data/models/subscription_model.dart';
 import '../../logic/subscription_cubit.dart';
 import '../../logic/subscription_state.dart';
@@ -27,72 +27,79 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ThemeCubit, ThemeState>(
-      builder: (context, themeState) {
-        final primaryAccent = themeState.currentPalette.accentPrimary;
-        final glassOpacity = themeState.glassOpacity;
+    return BlocListener<HabitCubit, HabitState>(
+      listener: (context, habitState) {
+        context.read<SubscriptionCubit>().syncWithHabits(habitState.habits);
+      },
+      child: BlocBuilder<ThemeCubit, ThemeState>(
+        builder: (context, themeState) {
+          final primaryAccent = themeState.currentPalette.accentPrimary;
+          final glassOpacity = themeState.glassOpacity;
 
-        return BlocBuilder<SubscriptionCubit, SubscriptionState>(
-          builder: (context, state) {
-            return Scaffold(
-              backgroundColor: Colors.transparent,
-              body: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 12),
-                      _buildHeader(context, state, primaryAccent, glassOpacity),
-                      const SizedBox(height: 16),
-                      _buildFilterPills(context, state, primaryAccent),
-                      const SizedBox(height: 16),
-                      Expanded(
-                        child: state.status == SubscriptionStatus.loading
-                            ? Center(
-                                child: CircularProgressIndicator(
-                                  color: primaryAccent,
-                                ),
-                              )
-                            : state.filteredSubscriptions.isEmpty
-                                ? _buildEmptyState()
-                                : ListView.builder(
-                                    itemCount:
-                                        state.filteredSubscriptions.length,
-                                    padding: const EdgeInsets.only(bottom: 110),
-                                    itemBuilder: (context, index) {
-                                      final sub =
-                                          state.filteredSubscriptions[index];
-                                      return Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 12.0),
-                                        child: Interactive3DSubscriptionCard(
-                                          subscription: sub,
-                                          primaryAccent: primaryAccent,
-                                          glassOpacity: glassOpacity,
-                                          onRenew: () {
-                                            context
-                                                .read<SubscriptionCubit>()
-                                                .renewSubscription(sub);
-                                          },
-                                          onDelete: () {
-                                            context
-                                                .read<SubscriptionCubit>()
-                                                .deleteSubscription(sub.id);
-                                          },
-                                        ),
-                                      );
-                                    },
+          return BlocBuilder<SubscriptionCubit, SubscriptionState>(
+            builder: (context, state) {
+              return Scaffold(
+                backgroundColor: Colors.transparent,
+                body: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 12),
+                        _buildHeader(
+                            context, state, primaryAccent, glassOpacity),
+                        const SizedBox(height: 16),
+                        _buildFilterPills(context, state, primaryAccent),
+                        const SizedBox(height: 16),
+                        Expanded(
+                          child: state.status == SubscriptionStatus.loading
+                              ? Center(
+                                  child: CircularProgressIndicator(
+                                    color: primaryAccent,
                                   ),
-                      ),
-                    ],
+                                )
+                              : state.filteredSubscriptions.isEmpty
+                                  ? _buildEmptyState()
+                                  : ListView.builder(
+                                      itemCount:
+                                          state.filteredSubscriptions.length,
+                                      padding:
+                                          const EdgeInsets.only(bottom: 110),
+                                      itemBuilder: (context, index) {
+                                        final sub =
+                                            state.filteredSubscriptions[index];
+                                        return Padding(
+                                          padding: const EdgeInsets.only(
+                                              bottom: 12.0),
+                                          child: Interactive3DSubscriptionCard(
+                                            subscription: sub,
+                                            primaryAccent: primaryAccent,
+                                            glassOpacity: glassOpacity,
+                                            onRenew: () {
+                                              context
+                                                  .read<SubscriptionCubit>()
+                                                  .renewSubscription(sub);
+                                            },
+                                            onDelete: () {
+                                              context
+                                                  .read<SubscriptionCubit>()
+                                                  .deleteSubscription(sub.id);
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
-        );
-      },
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -233,17 +240,16 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     double glassOpacity,
   ) {
     final cubit = context.read<SubscriptionCubit>();
-    final habitCubit = context.read<HabitCubit>();
-
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        child: BlocProvider.value(
-          value: habitCubit,
-          child: AddSubscriptionBottomSheet(
+      builder: (dialogContext) => BlocProvider.value(
+        value: cubit,
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          child: AddSubscriptionDialog(
             primaryAccent: primaryAccent,
             glassOpacity: glassOpacity,
             onSave: (SubscriptionModel newSub) {

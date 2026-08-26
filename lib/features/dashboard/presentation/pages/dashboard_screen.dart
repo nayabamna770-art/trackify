@@ -1,19 +1,38 @@
+// Import standard Flutter material design package for layout and widget creation
 import 'package:flutter/material.dart';
+// Import Flutter BLoC package to listen to application state changes reactively
 import 'package:flutter_bloc/flutter_bloc.dart';
+// Import global glass design styling constants (such as border widths)
 import 'package:trackify/app/constants/app_glass_style.dart';
-import 'package:trackify/core/theme/theme_cubit.dart';
+// Import ThemeCubit to manage dynamic theme switching and color palette properties
+import 'package:trackify/core/theme/logic/theme_cubit.dart';
 import 'package:trackify/core/theme/theme_state.dart';
+// Import reusable glassmorphism container wrapper for cards and widgets
 import 'package:trackify/core/widgets/glass_container.dart';
+// Import the settings screen destination for top utility navigation
 import 'package:trackify/settings/presentation/pages/setting_screen.dart';
+// Import Setting Habit screen for navigation from habit cards
+import 'package:trackify/habit/presentation/pages/setting_habit_screen.dart';
 
+/// DashboardScreen is the primary landing screen displaying the user's daily overview,
+/// common habits, solid activity heatmaps, and subscription renewal matrix.
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Listen to ThemeCubit to rebuild the dashboard when the active theme palette updates
     return BlocBuilder<ThemeCubit, ThemeState>(
       builder: (context, themeState) {
+        // Extract the active theme's custom color palette
         final palette = themeState.currentPalette;
+
+        // Common habit items for universal student/professional utility
+        final List<Map<String, String>> commonHabits = [
+          {'name': 'Walk / Exercise', 'quote': 'Stay active, stay sharp'},
+          {'name': 'Coding / Focus Work', 'quote': 'Build consistency'},
+          {'name': 'Documentation / Reading', 'quote': 'Knowledge compounds'},
+        ];
 
         return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
@@ -45,116 +64,128 @@ class DashboardScreen extends StatelessWidget {
               ],
             ),
 
+            const SizedBox(height: 8),
+
+            // --- TOP ROW: WELCOME CARD WITH NAME & SMILE EMOJI ---
+            _HoverPopCard(
+              child: GlassContainer(
+                padding: const EdgeInsets.all(20),
+                borderRadius: 24,
+                opacity: themeState.glassOpacity,
+                accentGlowColor: palette.accentPrimary,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'DAILY OVERVIEW',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                        color: palette.accentPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Welcome Back, Nayab! 😊',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: palette.textHeading,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Let us build great momentum today.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: palette.textPrimary.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // --- SECTION: COMMON HABITS ---
+            _buildSectionHeader(
+              title: 'Common Habits',
+              subtitle: 'Tap (+) to customize and activate your habits',
+              icon: Icons.track_changes_rounded,
+              accentColor: palette.accentPrimary,
+              headingColor: palette.textHeading,
+            ),
             const SizedBox(height: 12),
 
-            // --- TOP ROW: WELCOME & FIERY STREAK BADGE ---
-            Row(
-              children: [
-                Expanded(
+            // Compact habit cards mapped dynamically with '+' navigation to SettingHabitScreen
+            ...commonHabits.map((habit) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10.0),
                   child: _HoverPopCard(
                     child: GlassContainer(
-                      padding: const EdgeInsets.all(18),
-                      borderRadius: 24,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      borderRadius: 16,
                       opacity: themeState.glassOpacity,
                       accentGlowColor: palette.accentPrimary,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'DAILY OVERVIEW',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.2,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                habit['name']!,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: palette.textHeading,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                habit['quote']!,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: palette.textPrimary
+                                      .withValues(alpha: 0.7),
+                                ),
+                              ),
+                            ],
+                          ),
+                          IconButton(
+                            constraints: const BoxConstraints(),
+                            padding: EdgeInsets.zero,
+                            icon: Icon(
+                              Icons.add_circle_outline_rounded,
                               color: palette.accentPrimary,
+                              size: 26,
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Welcome Back!',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: palette.textHeading,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'You are on a roll this week.',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: palette.textPrimary.withValues(alpha: 0.7),
-                            ),
+                            tooltip: 'Configure Habit',
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SettingHabitScreen(
+                                    habitName: habit['name']!,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 14),
-                // Fiery Streak Badge
-                _HoverPopCard(
-                  child: GlassContainer(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 16,
-                    ),
-                    borderRadius: 24,
-                    opacity: themeState.glassOpacity + 0.05,
-                    accentGlowColor: Colors.orangeAccent,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.orangeAccent.withValues(alpha: 0.2),
-                            boxShadow: [
-                              BoxShadow(
-                                color:
-                                    Colors.orangeAccent.withValues(alpha: 0.4),
-                                blurRadius: 12,
-                                spreadRadius: 2,
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.local_fire_department_rounded,
-                            color: Colors.orangeAccent,
-                            size: 32,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '18',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: palette.textHeading,
-                          ),
-                        ),
-                        Text(
-                          'Days Streak',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: palette.textPrimary.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                )),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 18),
 
-            // --- SECTION 1: HABIT COMMITMENT HEATMAP ---
+            // --- SECTION 1: HABIT CONSISTENCY HEATMAP (SOLID DARK CONTAINER) ---
             _buildSectionHeader(
               title: 'Habit Consistency Heatmap',
-              subtitle: 'Daily completion activity by weekday',
+              subtitle: 'Track your daily completion progress',
               icon: Icons.grid_on_rounded,
               accentColor: palette.accentPrimary,
               headingColor: palette.textHeading,
@@ -170,10 +201,10 @@ class DashboardScreen extends StatelessWidget {
 
             const SizedBox(height: 28),
 
-            // --- SECTION 2: SUBSCRIPTION & BILLING CYCLE MATRIX ---
+            // --- SECTION 2: SUBSCRIPTION & BILLING CYCLE MATRIX (SOLID DARK CONTAINER) ---
             _buildSectionHeader(
               title: 'Subscription Renewals',
-              subtitle: 'Monthly billing timeline overview',
+              subtitle: 'Active monthly billing schedule',
               icon: Icons.calendar_view_month_rounded,
               accentColor: palette.accentSecondary,
               headingColor: palette.textHeading,
@@ -194,6 +225,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  /// Helper method to construct unified section headers
   Widget _buildSectionHeader({
     required String title,
     required String subtitle,
@@ -220,7 +252,7 @@ class DashboardScreen extends StatelessWidget {
               subtitle,
               style: TextStyle(
                 fontSize: 11,
-                color: headingColor.withValues(alpha: 0.6),
+                color: headingColor.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -229,30 +261,40 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  /// Builds the habit consistency heatmap grid on a solid dark background for new users
   Widget _buildHabitHeatmapGrid({
     required ThemeState themeState,
     required Color accentColor,
     required Color textColor,
   }) {
     const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    // For a brand new user, initialize with empty/zero activity values
     const mockActivity = [
-      [3, 4, 2, 4, 1],
-      [2, 3, 4, 1, 4],
-      [4, 4, 3, 2, 3],
-      [1, 2, 4, 4, 2],
-      [4, 3, 1, 3, 4],
-      [0, 1, 2, 1, 2],
-      [2, 2, 3, 4, 3],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
     ];
 
-    return GlassContainer(
+    return Container(
       padding: const EdgeInsets.all(16),
-      borderRadius: 20,
-      opacity: themeState.glassOpacity,
+      decoration: BoxDecoration(
+        color:
+            Colors.black.withValues(alpha: 0.45), // Solid dark base container
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.25),
+          width: AppGlassStyle.borderWidth,
+        ),
+      ),
       child: Column(
         children: List.generate(daysOfWeek.length, (rowIndex) {
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 3.0),
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
             child: Row(
               children: [
                 SizedBox(
@@ -262,7 +304,7 @@ class DashboardScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: textColor.withValues(alpha: 0.6),
+                      color: textColor.withValues(alpha: 0.7),
                     ),
                   ),
                 ),
@@ -287,22 +329,26 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  /// Builds the monthly subscription calendar grid on a solid dark background
   Widget _buildSubscriptionHeatmapGrid({
     required ThemeState themeState,
     required Color accentColor,
     required Color textColor,
   }) {
-    const activeRenewalDays = {
-      5: '\$14',
-      14: '\$9.99',
-      21: '\$12',
-      28: '\$4.99',
-    };
+    // Empty map initially for a new user setting up subscriptions
+    const Map<int, String> activeRenewalDays = {};
 
-    return GlassContainer(
+    return Container(
       padding: const EdgeInsets.all(16),
-      borderRadius: 20,
-      opacity: themeState.glassOpacity,
+      decoration: BoxDecoration(
+        color:
+            Colors.black.withValues(alpha: 0.45), // Solid dark base container
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.25),
+          width: AppGlassStyle.borderWidth,
+        ),
+      ),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -328,6 +374,7 @@ class DashboardScreen extends StatelessWidget {
   }
 }
 
+/// Reusable interactive wrapper card that applies smooth scale pop effect on hover
 class _HoverPopCard extends StatefulWidget {
   final Widget child;
   const _HoverPopCard({required this.child});
@@ -354,6 +401,7 @@ class _HoverPopCardState extends State<_HoverPopCard> {
   }
 }
 
+/// Individual heatmap cell inside the habit consistency grid (empty boxes for new user)
 class _HoverHeatmapCell extends StatefulWidget {
   final int intensity;
   final Color accentColor;
@@ -380,33 +428,25 @@ class _HoverHeatmapCellState extends State<_HoverHeatmapCell> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedScale(
-        scale: _isHovered ? 1.35 : 1.0,
+        scale: _isHovered ? 1.3 : 1.0,
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeOutCubic,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          width: 22,
-          height: 22,
+          width: 24,
+          height: 24,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(6),
             color: !isFilled
-                ? widget.textColor.withValues(alpha: 0.08)
+                ? Colors.white
+                    .withValues(alpha: 0.04) // Clear, dark empty box appearance
                 : widget.accentColor.withValues(alpha: 0.2 * widget.intensity),
             border: Border.all(
-              color: isFilled || _isHovered
-                  ? widget.accentColor.withValues(alpha: _isHovered ? 1.0 : 0.4)
-                  : Colors.transparent,
+              color: _isHovered
+                  ? widget.accentColor
+                  : Colors.white.withValues(alpha: 0.1),
               width: AppGlassStyle.borderWidth,
             ),
-            boxShadow: _isHovered && isFilled
-                ? [
-                    BoxShadow(
-                      color: widget.accentColor.withValues(alpha: 0.8),
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                    )
-                  ]
-                : [],
           ),
         ),
       ),
@@ -414,6 +454,7 @@ class _HoverHeatmapCellState extends State<_HoverHeatmapCell> {
   }
 }
 
+/// Individual calendar grid cell representing a day for a new user
 class _HoverSubscriptionCell extends StatefulWidget {
   final int day;
   final bool isRenewal;
@@ -440,7 +481,7 @@ class _HoverSubscriptionCellState extends State<_HoverSubscriptionCell> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedScale(
-        scale: _isHovered ? 1.2 : 1.0,
+        scale: _isHovered ? 1.15 : 1.0,
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeOutCubic,
         child: AnimatedContainer(
@@ -449,22 +490,13 @@ class _HoverSubscriptionCellState extends State<_HoverSubscriptionCell> {
             borderRadius: BorderRadius.circular(8),
             color: widget.isRenewal
                 ? widget.accentColor.withValues(alpha: 0.25)
-                : widget.textColor.withValues(alpha: 0.05),
+                : Colors.white.withValues(alpha: 0.03), // Clear, dark empty box
             border: Border.all(
-              color: widget.isRenewal || _isHovered
-                  ? widget.accentColor.withValues(alpha: _isHovered ? 1.0 : 0.6)
-                  : Colors.transparent,
+              color: _isHovered
+                  ? widget.accentColor
+                  : Colors.white.withValues(alpha: 0.08),
               width: AppGlassStyle.borderWidth,
             ),
-            boxShadow: _isHovered && widget.isRenewal
-                ? [
-                    BoxShadow(
-                      color: widget.accentColor.withValues(alpha: 0.7),
-                      blurRadius: 12,
-                      spreadRadius: 2,
-                    )
-                  ]
-                : [],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -473,25 +505,12 @@ class _HoverSubscriptionCellState extends State<_HoverSubscriptionCell> {
                 '${widget.day}',
                 style: TextStyle(
                   fontSize: 10,
-                  fontWeight: widget.isRenewal || _isHovered
-                      ? FontWeight.bold
-                      : FontWeight.normal,
-                  color: widget.isRenewal || _isHovered
+                  fontWeight: _isHovered ? FontWeight.bold : FontWeight.normal,
+                  color: _isHovered
                       ? widget.accentColor
-                      : widget.textColor.withValues(alpha: 0.5),
+                      : widget.textColor.withValues(alpha: 0.6),
                 ),
               ),
-              if (widget.isRenewal) ...[
-                const SizedBox(height: 1),
-                Container(
-                  width: 4,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: widget.accentColor,
-                  ),
-                ),
-              ],
             ],
           ),
         ),

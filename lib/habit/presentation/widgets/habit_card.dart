@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:trackify/core/theme/theme_cubit.dart';
+import 'package:trackify/core/theme/logic/theme_cubit.dart';
 import 'package:trackify/core/theme/theme_state.dart';
 import 'package:trackify/subscription/presentation/widgets/interactive_glare_card.dart';
 

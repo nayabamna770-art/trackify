@@ -7,7 +7,8 @@ import 'subscription_state.dart';
 class SubscriptionCubit extends Cubit<SubscriptionState> {
   final SubscriptionRepository repository;
 
-  SubscriptionCubit({required this.repository}) : super(const SubscriptionState()) {
+  SubscriptionCubit({required this.repository})
+      : super(const SubscriptionState()) {
     loadSubscriptions();
   }
 
@@ -24,7 +25,8 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
   }
 
   void syncWithHabits(List<HabitModel> habits) {
-    final updatedSubscriptions = state.subscriptions.map((sub) {
+    final currentSubscriptions = repository.fetchInitialSubscriptions();
+    final updatedSubscriptions = currentSubscriptions.map((sub) {
       if (!sub.hasLinkedHabit) return sub;
 
       HabitModel? matchingHabit;
@@ -47,19 +49,33 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
     }).toList();
 
     repository.saveAllSubscriptions(updatedSubscriptions);
-    emit(state.copyWith(subscriptions: updatedSubscriptions));
+    emit(state.copyWith(
+      subscriptions: updatedSubscriptions,
+      status: SubscriptionStatus.loaded,
+    ));
   }
 
-  void addSubscription(SubscriptionModel sub) async {
-    await repository.saveSubscription(sub);
-    final updated = List<SubscriptionModel>.from(state.subscriptions)..add(sub);
-    emit(state.copyWith(subscriptions: updated));
+  void addSubscription(SubscriptionModel newSub) async {
+    // 1. Persist the new subscription using your repository save method
+    await repository.saveSubscription(newSub);
+
+    // 2. Fetch fresh list from repository to stay consistent with delete/renew logic
+    final freshData = repository.fetchInitialSubscriptions();
+
+    // 3. Emit updated state with fresh data
+    emit(state.copyWith(
+      subscriptions: freshData,
+      status: SubscriptionStatus.loaded,
+    ));
   }
 
   void deleteSubscription(String id) async {
     await repository.deleteSubscription(id);
-    final updated = state.subscriptions.where((s) => s.id != id).toList();
-    emit(state.copyWith(subscriptions: updated));
+    final freshData = repository.fetchInitialSubscriptions();
+    emit(state.copyWith(
+      subscriptions: freshData,
+      status: SubscriptionStatus.loaded,
+    ));
   }
 
   void renewSubscription(SubscriptionModel sub) async {
@@ -71,8 +87,10 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
     final updated = sub.copyWith(nextBillingDate: updatedDate);
 
     await repository.saveSubscription(updated);
-    final list =
-        state.subscriptions.map((s) => s.id == sub.id ? updated : s).toList();
-    emit(state.copyWith(subscriptions: list));
+    final freshData = repository.fetchInitialSubscriptions();
+    emit(state.copyWith(
+      subscriptions: freshData,
+      status: SubscriptionStatus.loaded,
+    ));
   }
 }

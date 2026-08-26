@@ -1,12 +1,17 @@
+// Import core Flutter material packages
 import 'package:flutter/material.dart';
+// Import flutter_bloc for state management providers and builders
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:trackify/core/theme/theme_cubit.dart';
+// Import theme management cubit and states
+import 'package:trackify/core/theme/logic/theme_cubit.dart';
 import 'package:trackify/core/theme/theme_state.dart';
+// Import custom reusable UI components for glassmorphism and navigation
 import 'package:trackify/core/widgets/floating_frosted_navbar.dart';
 import 'package:trackify/core/widgets/glass_container.dart';
 import 'package:trackify/core/widgets/glow_orb.dart';
 import 'package:trackify/core/widgets/spring_scale_button.dart';
 import 'package:trackify/core/widgets/theme_selection_bottom_sheet.dart';
+// Import feature screens linked via the bottom shell navigation
 import 'package:trackify/features/dashboard/presentation/pages/dashboard_screen.dart';
 import 'package:trackify/habit/bloc/habit_cubit.dart';
 import 'package:trackify/habit/data/habit_repository.dart';
@@ -14,11 +19,14 @@ import 'package:trackify/habit/presentation/pages/habit_screen.dart';
 import 'package:trackify/settings/presentation/pages/setting_screen.dart';
 import 'package:trackify/subscription/presentation/pages/subscription_screen.dart';
 
+/// MainScreenShell acts as the wrapper widget that injects global blocs (like HabitCubit)
+/// and provides the persistent bottom navigation shell structure for core app screens.
 class MainScreenShell extends StatelessWidget {
   const MainScreenShell({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Provide HabitCubit globally across the sub-screens wrapped inside this shell
     return BlocProvider(
       create: (context) => HabitCubit(repository: HabitRepository())..loadHabits(),
       child: const _MainScreenShellView(),
@@ -34,8 +42,10 @@ class _MainScreenShellView extends StatefulWidget {
 }
 
 class _MainScreenShellViewState extends State<_MainScreenShellView> {
+  // Tracks the currently selected index for bottom navigation tab switching
   int _currentIndex = 0;
 
+  // List of root screens accessible via the frosted navigation bar
   final List<Widget> _pages = const [
     DashboardScreen(),
     HabitsScreen(),
@@ -44,10 +54,12 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
 
   @override
   Widget build(BuildContext context) {
+    // Fetch device media query details to calculate safe padding offsets
     final mediaQuery = MediaQuery.of(context);
     final topPadding = mediaQuery.padding.top;
     final bottomInset = mediaQuery.padding.bottom + 90;
 
+    // Listen to theme state changes to dynamically adapt glassmorphism and colors
     return BlocBuilder<ThemeCubit, ThemeState>(
       builder: (context, themeState) {
         final palette = themeState.currentPalette;
@@ -55,6 +67,7 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
         return Scaffold(
           body: Stack(
             children: [
+              // Decorative background glowing orb positioned at the top right
               Positioned(
                 top: -60,
                 right: -40,
@@ -64,6 +77,7 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                   opacity: 0.35,
                 ),
               ),
+              // Decorative background glowing orb positioned at the bottom left
               Positioned(
                 bottom: 80,
                 left: -50,
@@ -73,10 +87,12 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                   opacity: 0.30,
                 ),
               ),
+              // Main layout padding containing the top bar header and IndexedStack body
               Padding(
                 padding: EdgeInsets.only(top: topPadding, bottom: bottomInset),
                 child: Column(
                   children: [
+                    // Top App Bar Header Row
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20.0,
@@ -85,6 +101,7 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          // Greeting text column
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -107,8 +124,10 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                               ),
                             ],
                           ),
+                          // Action buttons row (Theme Switcher and Settings shortcut)
                           Row(
                             children: [
+                              // Palette theme selector button with spring scaling animation
                               SpringScaleButton(
                                 onTap: () {
                                   final themeCubit = context.read<ThemeCubit>();
@@ -137,6 +156,7 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                                 ),
                               ),
                               const SizedBox(width: 10),
+                              // Settings screen navigation button
                               SpringScaleButton(
                                 onTap: () {
                                   Navigator.push(
@@ -162,6 +182,7 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                         ],
                       ),
                     ),
+                    // Body content area preserving widget state across tabs using IndexedStack
                     Expanded(
                       child: IndexedStack(
                         index: _currentIndex,
@@ -171,6 +192,7 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                   ],
                 ),
               ),
+              // Floating frosted navigation bar pinned at the bottom center
               Align(
                 alignment: Alignment.bottomCenter,
                 child: FloatingFrostedNavbar(

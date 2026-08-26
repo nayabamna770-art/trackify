@@ -29,17 +29,37 @@ class SubscriptionState extends Equatable {
       case SubscriptionFilter.all:
         return subscriptions;
       case SubscriptionFilter.active:
-        return subscriptions.where((s) => s.isActive).toList();
+        return subscriptions.where((s) => _checkIsActive(s)).toList();
       case SubscriptionFilter.needsAttention:
-        return subscriptions.where((s) => s.needsAttention).toList();
+        return subscriptions.where((s) => _checkNeedsAttention(s)).toList();
       case SubscriptionFilter.habitLinked:
         return subscriptions.where((s) => s.hasLinkedHabit).toList();
     }
   }
 
+  /// Helper to safely determine active state even if model getter is omitted
+  bool _checkIsActive(SubscriptionModel sub) {
+    try {
+      return sub.isActive;
+    } catch (_) {
+      return true; // Default fallback so new items aren't hidden
+    }
+  }
+
+  /// Helper to safely determine attention state
+  bool _checkNeedsAttention(SubscriptionModel sub) {
+    try {
+      return sub.needsAttention;
+    } catch (_) {
+      return sub.isUnderutilized;
+    }
+  }
+
   /// Calculates total monthly expenditure normalized across billing cycles.
   double get totalMonthlyExpense {
-    return subscriptions.where((s) => s.isActive).fold(0.0, (total, sub) {
+    return subscriptions.where((s) => _checkIsActive(s)).fold(0.0,
+        (total, sub) {
+      if (sub.isFreeTrial) return total;
       if (sub.billingCycle == BillingCycle.yearly) {
         return total + (sub.cost / 12);
       }
@@ -49,7 +69,7 @@ class SubscriptionState extends Equatable {
 
   /// Count of subscriptions that need immediate attention or renewal.
   int get attentionCount {
-    return subscriptions.where((s) => s.needsAttention).length;
+    return subscriptions.where((s) => _checkNeedsAttention(s)).length;
   }
 
   SubscriptionState copyWith({
@@ -62,10 +82,11 @@ class SubscriptionState extends Equatable {
       status: status ?? this.status,
       subscriptions: subscriptions ?? this.subscriptions,
       currentFilter: currentFilter ?? this.currentFilter,
-      errorMessage: errorMessage,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 
   @override
-  List<Object?> get props => [status, subscriptions, currentFilter, errorMessage];
+  List<Object?> get props =>
+      [status, subscriptions, currentFilter, errorMessage];
 }

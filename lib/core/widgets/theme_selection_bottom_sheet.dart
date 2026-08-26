@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:trackify/core/theme/theme_cubit.dart';
-import 'package:trackify/core/theme/theme_state.dart';
+import 'package:trackify/core/theme/logic/theme_cubit.dart';
+import 'package:trackify/core/theme/theme_state.dart'; // Contains ThemePalette & ThemeGroup
 import 'package:trackify/core/widgets/glass_container.dart';
+import 'package:trackify/app/constants/app_colors.dart';
 
 class ThemeSelectionBottomSheet extends StatelessWidget {
   const ThemeSelectionBottomSheet({super.key});
@@ -52,14 +53,14 @@ class ThemeSelectionBottomSheet extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Theme Groups (3 groups x 4 swatch palettes)
+              // Theme Groups ListView
               SizedBox(
                 height: 320,
                 child: ListView.builder(
                   shrinkWrap: true,
-                  itemCount: appThemeGroups.length,
+                  itemCount: AppColors.appThemeGroups.length,
                   itemBuilder: (context, groupIndex) {
-                    final group = appThemeGroups[groupIndex];
+                    final group = AppColors.appThemeGroups[groupIndex];
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -87,9 +88,9 @@ class ThemeSelectionBottomSheet extends StatelessWidget {
                           ),
                           itemCount: group.palettes.length,
                           itemBuilder: (context, paletteIndex) {
-                            final palette = group.palettes[paletteIndex];
-                            final isSelected =
-                                palette.id == currentPalette.id;
+                            final palette =
+                                group.palettes[paletteIndex]; // ThemePalette
+                            final isSelected = palette.id == currentPalette.id;
 
                             return GestureDetector(
                               onTap: () {
@@ -123,7 +124,6 @@ class ThemeSelectionBottomSheet extends StatelessWidget {
                                         color: palette.textHeading,
                                       ),
                                     ),
-                                    // 4 Swatch Colors (VS Code style)
                                     Row(
                                       children: [
                                         _buildSwatchCircle(palette.background),
@@ -147,7 +147,6 @@ class ThemeSelectionBottomSheet extends StatelessWidget {
                   },
                 ),
               ),
-
               const Divider(height: 24),
 
               // Glass Opacity Target Slider

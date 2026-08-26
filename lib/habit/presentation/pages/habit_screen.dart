@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:trackify/core/theme/theme_cubit.dart';
+import 'package:trackify/core/theme/logic/theme_cubit.dart';
 import 'package:trackify/core/theme/theme_state.dart';
 import 'package:trackify/core/widgets/glass_container.dart';
 import 'package:trackify/core/widgets/spring_scale_button.dart';
@@ -10,9 +10,11 @@ import 'package:trackify/habit/presentation/widgets/appreciation_card_dialog.dar
 import 'package:trackify/habit/presentation/widgets/current_task_timer_bottom_sheet.dart';
 import 'package:trackify/habit/presentation/widgets/habit_card.dart';
 
+/// Screen displaying active routines, daily task timers, and habit metrics.
 class HabitsScreen extends StatelessWidget {
   const HabitsScreen({super.key});
 
+  /// Displays the modal sheet for adding a new routine/habit.
   void _showAddHabitModal(
       BuildContext context, dynamic palette, double opacity) {
     showGeneralDialog(
@@ -51,6 +53,7 @@ class HabitsScreen extends StatelessWidget {
     );
   }
 
+  /// Displays the task countdown timer modal.
   void _showCurrentTaskTimerModal(
       BuildContext context, dynamic palette, double opacity) {
     showGeneralDialog(

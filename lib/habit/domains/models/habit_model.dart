@@ -60,16 +60,17 @@ class HabitModel extends Equatable {
     this.defaultTimerMinutes = 25,
     this.linkedSubscriptionId,
     this.linkedSubscriptionName,
-  })  : iconCodePoint = iconCodePoint ?? (icon?.codePoint ?? Icons.check.codePoint),
-        weeklyProgress = weeklyProgress ?? const [false, false, false, false, false, false, false],
+  })  : iconCodePoint =
+            iconCodePoint ?? (icon?.codePoint ?? Icons.check.codePoint),
+        weeklyProgress = weeklyProgress ??
+            const [false, false, false, false, false, false, false],
         completionDates = completionDates ?? const [];
-IconData get icon {
-  final family = iconFontFamily;
-  return IconData(
-    iconCodePoint,
-    fontFamily: family ?? 'MaterialIcons',
-  );
-}
+
+  IconData get icon {
+    final int code = iconCodePoint;
+    final String family = iconFontFamily ?? 'MaterialIcons';
+    return IconData(code, fontFamily: family);
+  }
 
   int get targetDurationMinutes => defaultTimerMinutes;
 
@@ -93,8 +94,10 @@ IconData get icon {
       id: id ?? this.id,
       title: title ?? this.title,
       category: category ?? this.category,
-      iconCodePoint: iconCodePoint ?? (icon != null ? icon.codePoint : this.iconCodePoint),
-      iconFontFamily: iconFontFamily ?? (icon != null ? icon.fontFamily : this.iconFontFamily),
+      iconCodePoint:
+          iconCodePoint ?? (icon != null ? icon.codePoint : this.iconCodePoint),
+      iconFontFamily: iconFontFamily ??
+          (icon != null ? icon.fontFamily : this.iconFontFamily),
       iconName: iconName ?? this.iconName,
       streakCount: streakCount ?? this.streakCount,
       isCompletedToday: isCompletedToday ?? this.isCompletedToday,
@@ -102,7 +105,8 @@ IconData get icon {
       completionDates: completionDates ?? this.completionDates,
       defaultTimerMinutes: defaultTimerMinutes ?? this.defaultTimerMinutes,
       linkedSubscriptionId: linkedSubscriptionId ?? this.linkedSubscriptionId,
-      linkedSubscriptionName: linkedSubscriptionName ?? this.linkedSubscriptionName,
+      linkedSubscriptionName:
+          linkedSubscriptionName ?? this.linkedSubscriptionName,
     );
   }
 

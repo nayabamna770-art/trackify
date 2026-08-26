@@ -1,8 +1,18 @@
+// Import necessary Flutter material design library for UI components
 import 'package:flutter/material.dart';
+// Import Flutter BLoC package for state management observation
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:trackify/core/theme/theme_cubit.dart';
-import 'package:trackify/features/onboarding/presentation/pages/main_screen_shell.dart'; // Update path as needed
+// Import Hive package for checking local storage profile flag
+import 'package:hive/hive.dart';
+// Import ThemeCubit to access the application's current color palettes and styling rules
+import 'package:trackify/core/theme/logic/theme_cubit.dart';
+// Import MainScreenShell for returning users
+import 'package:trackify/features/onboarding/presentation/pages/main_shell_screen.dart';
+// Import ProfileSetupScreen for first-time users
+import 'package:trackify/features/onboarding/presentation/pages/profile_setup_screen.dart';
 
+/// SplashScreen serves as the initial entry point view when the application launches.
+/// It displays branding and verifies local user storage to handle routing.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -14,20 +24,27 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToHome();
+    _checkUserAndNavigate();
   }
 
-  Future<void> _navigateToHome() async {
-    // Simulate initialization delay (e.g., fetching initial local storage/auth)
+  /// Asynchronous method to check Hive profile existence and route accordingly
+  Future<void> _checkUserAndNavigate() async {
     await Future.delayed(const Duration(seconds: 2));
 
     if (!mounted) return;
 
-    // Smooth transition into MainScreenShell
+    // Open user profile box to check onboarding status
+    final profileBox = await Hive.openBox('user_profile_box');
+    final bool hasCompletedOnboarding = profileBox.get('has_completed_onboarding', defaultValue: false);
+
+    // Conditional routing based on whether user is new or returning
+    Widget targetScreen = hasCompletedOnboarding 
+        ? const MainScreenShell() 
+        : const ProfileSetupScreen();
+
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            const MainScreenShell(),
+        pageBuilder: (context, animation, secondaryAnimation) => targetScreen,
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
         },

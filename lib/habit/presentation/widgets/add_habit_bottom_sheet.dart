@@ -217,23 +217,27 @@ class _AddHabitBottomSheetState extends State<AddHabitBottomSheet>
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
+                        child: SpringScaleButton(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            Navigator.pop(context);
+                          },
+                          child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            side: BorderSide(
-                              color: palette.textPrimary.withValues(alpha: 0.3),
-                            ),
-                            shape: RoundedRectangleBorder(
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: palette.textPrimary.withValues(alpha: 0.3),
+                              ),
                             ),
-                          ),
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(
-                            'Cancel',
-                            style: TextStyle(
-                              color: palette.textPrimary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                            child: Text(
+                              'Cancel',
+                              style: TextStyle(
+                                color: palette.textPrimary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
                           ),
                         ),
@@ -280,6 +284,14 @@ class _AddHabitBottomSheetState extends State<AddHabitBottomSheet>
                             decoration: BoxDecoration(
                               color: palette.accentPrimary,
                               borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: palette.accentPrimary
+                                      .withValues(alpha: 0.25),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
                             child: const Text(
                               'Save Habit',

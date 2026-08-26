@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class GlowOrb extends StatefulWidget {
   final double size;
@@ -13,7 +14,7 @@ class GlowOrb extends StatefulWidget {
     required this.color,
     this.blurRadius = 80.0,
     this.opacity = 0.45,
-    this.enableTouchGlow = false,
+    this.enableTouchGlow = true,
   });
 
   @override
@@ -25,31 +26,44 @@ class _GlowOrbState extends State<GlowOrb> {
 
   void _setInteracted(bool value) {
     if (!widget.enableTouchGlow) return;
+    if (value) {
+      HapticFeedback.lightImpact();
+    }
     setState(() => _isInteracted = value);
+  }
+
+  void _pulseOnTap() {
+    if (!widget.enableTouchGlow) return;
+    _setInteracted(true);
+    Future.delayed(const Duration(milliseconds: 250), () {
+      if (mounted) {
+        _setInteracted(false);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final activeOpacity = _isInteracted
-        ? (widget.opacity * 1.5).clamp(0.0, 1.0)
-        : widget.opacity;
+    final activeOpacity =
+        _isInteracted ? (widget.opacity * 1.6).clamp(0.0, 1.0) : widget.opacity;
     final activeBlur =
-        _isInteracted ? widget.blurRadius * 1.3 : widget.blurRadius;
-    final activeScale = _isInteracted ? 1.08 : 1.0;
+        _isInteracted ? widget.blurRadius * 1.4 : widget.blurRadius;
+    final activeScale = _isInteracted ? 1.12 : 1.0;
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTapDown: (_) => _setInteracted(true),
-      onTapUp: (_) => _setInteracted(false),
+      onTapUp: (_) => _pulseOnTap(),
       onTapCancel: () => _setInteracted(false),
       child: MouseRegion(
         onEnter: (_) => _setInteracted(true),
         onExit: (_) => _setInteracted(false),
         child: AnimatedScale(
           scale: activeScale,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutCubic,
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutBack,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
+            duration: const Duration(milliseconds: 180),
             curve: Curves.easeOutCubic,
             width: widget.size,
             height: widget.size,

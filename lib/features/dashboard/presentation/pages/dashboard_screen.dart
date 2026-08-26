@@ -35,13 +35,7 @@ class DashboardScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SettingsScreen(
-                              primaryAccent: palette.accentPrimary,
-                              glassOpacity: themeState.glassOpacity,
-                              onOpacityChanged: (newOpacity) {
-                                // Dynamic opacity handler
-                              },
-                            ),
+                            builder: (context) => const SettingsScreen(),
                           ),
                         );
                       },

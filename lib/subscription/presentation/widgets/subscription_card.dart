@@ -11,6 +11,7 @@ class SubscriptionCard extends StatelessWidget {
   final double glassOpacity;
   final VoidCallback onRenew;
   final VoidCallback onDelete;
+  final VoidCallback? onCancel;
 
   const SubscriptionCard({
     super.key,
@@ -19,6 +20,7 @@ class SubscriptionCard extends StatelessWidget {
     required this.glassOpacity,
     required this.onRenew,
     required this.onDelete,
+    this.onCancel,
   });
 
   @override
@@ -174,6 +176,13 @@ class SubscriptionCard extends StatelessWidget {
                         onPressed: onRenew,
                         tooltip: 'Quick Renew 1 Cycle',
                       ),
+                      if (onCancel != null)
+                        IconButton(
+                          icon: const Icon(Icons.cancel_outlined,
+                              color: Colors.amberAccent, size: 20),
+                          onPressed: onCancel,
+                          tooltip: 'Cancel Subscription',
+                        ),
                       IconButton(
                         icon: const Icon(Icons.delete_outline,
                             color: Colors.redAccent, size: 20),

@@ -141,13 +141,7 @@ class _MainScreenShellViewState extends State<_MainScreenShellView> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => SettingsScreen(
-                                        primaryAccent: palette.accentPrimary,
-                                        glassOpacity: themeState.glassOpacity,
-                                        onOpacityChanged: (newOpacity) {
-                                          // Update opacity state via ThemeCubit if needed
-                                        },
-                                      ),
+                                      builder: (context) => const SettingsScreen(),
                                     ),
                                   );
                                 },

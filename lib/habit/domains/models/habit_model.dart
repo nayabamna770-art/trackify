@@ -63,11 +63,13 @@ class HabitModel extends Equatable {
   })  : iconCodePoint = iconCodePoint ?? (icon?.codePoint ?? Icons.check.codePoint),
         weeklyProgress = weeklyProgress ?? const [false, false, false, false, false, false, false],
         completionDates = completionDates ?? const [];
-
-  IconData get icon => IconData(
-        iconCodePoint,
-        fontFamily: iconFontFamily ?? 'MaterialIcons',
-      );
+IconData get icon {
+  final family = iconFontFamily;
+  return IconData(
+    iconCodePoint,
+    fontFamily: family ?? 'MaterialIcons',
+  );
+}
 
   int get targetDurationMinutes => defaultTimerMinutes;
 

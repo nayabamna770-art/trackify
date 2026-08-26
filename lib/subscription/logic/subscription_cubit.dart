@@ -1,24 +1,22 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-///ort '../../habit/domains/models/habit_model.dart';
+import '../../habit/domains/models/habit_model.dart';
 import '../data/models/subscription_model.dart';
-import '../data/repositories/subscription_repository.dart';
+import '../data/subscription_repository.dart';
 import 'subscription_state.dart';
-import 'package:trackify/habit/domains/models/habit_model.dart';
 
 class SubscriptionCubit extends Cubit<SubscriptionState> {
-  final SubscriptionRepository? repository;
+  final SubscriptionRepository repository;
 
-  SubscriptionCubit({this.repository}) : super(const SubscriptionState());
+  SubscriptionCubit({required this.repository}) : super(const SubscriptionState()) {
+    loadSubscriptions();
+  }
 
   void loadSubscriptions() {
-    if (repository != null) {
-      final initialData = repository!.fetchInitialSubscriptions();
-      emit(state.copyWith(
-        subscriptions: initialData,
-        status: SubscriptionStatus.loaded,
-      ));
-    }
+    final data = repository.fetchInitialSubscriptions();
+    emit(state.copyWith(
+      subscriptions: data,
+      status: SubscriptionStatus.loaded,
+    ));
   }
 
   void setFilter(SubscriptionFilter filter) {
@@ -48,20 +46,23 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
       );
     }).toList();
 
+    repository.saveAllSubscriptions(updatedSubscriptions);
     emit(state.copyWith(subscriptions: updatedSubscriptions));
   }
 
-  void addSubscription(SubscriptionModel sub) {
+  void addSubscription(SubscriptionModel sub) async {
+    await repository.saveSubscription(sub);
     final updated = List<SubscriptionModel>.from(state.subscriptions)..add(sub);
     emit(state.copyWith(subscriptions: updated));
   }
 
-  void deleteSubscription(String id) {
+  void deleteSubscription(String id) async {
+    await repository.deleteSubscription(id);
     final updated = state.subscriptions.where((s) => s.id != id).toList();
     emit(state.copyWith(subscriptions: updated));
   }
 
-  void renewSubscription(SubscriptionModel sub) {
+  void renewSubscription(SubscriptionModel sub) async {
     final updatedDate = sub.nextBillingDate.add(
       sub.billingCycle == BillingCycle.monthly
           ? const Duration(days: 30)
@@ -69,6 +70,7 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
     );
     final updated = sub.copyWith(nextBillingDate: updatedDate);
 
+    await repository.saveSubscription(updated);
     final list =
         state.subscriptions.map((s) => s.id == sub.id ? updated : s).toList();
     emit(state.copyWith(subscriptions: list));

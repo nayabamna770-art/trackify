@@ -6,8 +6,11 @@ import 'core/database/boxes.dart';
 import 'core/theme/theme_cubit.dart';
 import 'core/theme/theme_state.dart';
 import 'features/onboarding/presentation/pages/splash_screen.dart';
+import 'habit/bloc/habit_cubit.dart';
+import 'habit/data/habit_repository.dart';
 import 'habit/domains/models/habit_model.dart';
-import 'subscription/data/repositories/subscription_repository.dart';
+import 'subscription/data/models/subscription_model.dart';
+import 'subscription/data/subscription_repository.dart';
 import 'subscription/logic/subscription_cubit.dart';
 
 Future<void> main() async {
@@ -18,9 +21,12 @@ Future<void> main() async {
 
   // Register generated Hive adapters
   Hive.registerAdapter(HabitModelAdapter());
+  Hive.registerAdapter(SubscriptionModelAdapter());
+  Hive.registerAdapter(BillingCycleAdapter());
 
-  // Open the required habits storage box
+  // Open the required storage boxes
   await Hive.openBox<HabitModel>(Boxes.habitsBoxName);
+  await Hive.openBox<SubscriptionModel>(Boxes.subscriptionsBoxName);
 
   runApp(const TrackifyApp());
 }
@@ -34,6 +40,11 @@ class TrackifyApp extends StatelessWidget {
       providers: [
         BlocProvider<ThemeCubit>(
           create: (context) => ThemeCubit(),
+        ),
+        BlocProvider<HabitCubit>(
+          create: (context) => HabitCubit(
+            repository: HabitRepository(),
+          )..loadHabits(),
         ),
         BlocProvider<SubscriptionCubit>(
           create: (context) => SubscriptionCubit(

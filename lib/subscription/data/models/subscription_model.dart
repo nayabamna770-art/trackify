@@ -1,23 +1,49 @@
 import 'package:equatable/equatable.dart';
+import 'package:hive/hive.dart';
 import 'currency_type.dart';
 
+part '../subscription_adapter.g.dart';
+
+@HiveType(typeId: 2)
 enum BillingCycle {
+  @HiveField(0)
   monthly,
+  @HiveField(1)
   yearly;
 
   String get name => toString().split('.').last;
 }
 
+@HiveType(typeId: 1)
 class SubscriptionModel extends Equatable {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final String name;
+
+  @HiveField(2)
   final double cost;
+
+  @HiveField(3)
   final BillingCycle billingCycle;
+
+  @HiveField(4)
   final DateTime nextBillingDate;
+
+  @HiveField(5)
   final CurrencyType currency;
-  final bool isFreeTrial; // Added field
+
+  @HiveField(6)
+  final bool isFreeTrial;
+
+  @HiveField(7)
   final String? linkedHabitId;
+
+  @HiveField(8)
   final String? linkedHabitName;
+
+  @HiveField(9)
   final bool isUnderutilized;
 
   const SubscriptionModel({
@@ -27,7 +53,7 @@ class SubscriptionModel extends Equatable {
     required this.billingCycle,
     required this.nextBillingDate,
     this.currency = CurrencyType.usd,
-    this.isFreeTrial = false, // Added named parameter
+    this.isFreeTrial = false,
     this.linkedHabitId,
     this.linkedHabitName,
     this.isUnderutilized = false,

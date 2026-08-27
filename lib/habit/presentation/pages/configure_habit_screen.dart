@@ -4,8 +4,15 @@ import 'package:trackify/app/constants/app_glass_style.dart';
 import 'package:trackify/core/theme/logic/theme_cubit.dart';
 import 'package:trackify/core/theme/theme_state.dart';
 
+import 'package:trackify/habit/domains/models/habit_model.dart';
+
 class ConfigureHabitScreen extends StatefulWidget {
-  const ConfigureHabitScreen({super.key});
+  final String? initialHabitName;
+
+  const ConfigureHabitScreen({
+    super.key,
+    this.initialHabitName,
+  });
 
   @override
   State<ConfigureHabitScreen> createState() => _ConfigureHabitScreenState();
@@ -22,7 +29,9 @@ class _ConfigureHabitScreenState extends State<ConfigureHabitScreen> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: 'New Routine');
+    _nameController = TextEditingController(
+      text: widget.initialHabitName ?? 'New Routine',
+    );
     _descController =
         TextEditingController(text: 'Stay consistent and build momentum');
   }
@@ -207,15 +216,17 @@ class _ConfigureHabitScreenState extends State<ConfigureHabitScreen> {
                       return;
                     }
 
-                    final habitData = {
-                      'name': _nameController.text.trim(),
-                      'description': _descController.text.trim(),
-                      'type': _selectedHabitType,
-                      'goalPeriod': _selectedGoalPeriod,
-                      'taskDays': _selectedTaskDays,
-                    };
+                    final habit = HabitModel(
+                      id: DateTime.now().millisecondsSinceEpoch.toString(),
+                      name: _nameController.text.trim(),
+                      category: _selectedHabitType,
+                      streak: 0,
+                      isCompletedToday: false,
+                      type: _selectedHabitType.toLowerCase(),
+                      weeklyProgress: const [false, false, false, false, false, false, false],
+                    );
 
-                    Navigator.pop(context, habitData);
+                    Navigator.pop(context, habit);
                   },
                   child: const Text(
                     'Save Habit Configuration',

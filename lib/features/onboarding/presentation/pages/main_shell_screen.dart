@@ -19,7 +19,7 @@ class _MainScreenShellState extends State<MainScreenShell> {
   // Persistent shell screens
   final List<Widget> _screens = [
     const DashboardScreen(),
-    const HabitOverviewTab(),
+    const HabitScreen(),
     const SubscriptionScreen(),
   ];
 

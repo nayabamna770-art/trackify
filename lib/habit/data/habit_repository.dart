@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:trackify/core/database/boxes.dart';
 import 'package:trackify/habit/domains/models/habit_model.dart';
@@ -10,16 +9,24 @@ class HabitRepository {
     if (_box.isEmpty) {
       _seedDefaultHabits();
     }
-    return _box.values.cast<HabitModel>().toList();
+    final List<HabitModel> habits = [];
+    for (var value in _box.values) {
+      if (value is Map) {
+        habits.add(HabitModel.fromJson(Map<String, dynamic>.from(value)));
+      } else if (value is HabitModel) {
+        habits.add(value);
+      }
+    }
+    return habits;
   }
 
   Future<void> saveHabit(HabitModel habit) async {
-    await _box.put(habit.id, habit);
+    await _box.put(habit.id, habit.toJson());
   }
 
   Future<void> saveAllHabits(List<HabitModel> habits) async {
-    final Map<String, HabitModel> habitMap = {
-      for (var habit in habits) habit.id: habit
+    final Map<String, dynamic> habitMap = {
+      for (var habit in habits) habit.id: habit.toJson()
     };
     await _box.putAll(habitMap);
   }
@@ -60,7 +67,7 @@ class HabitRepository {
     ];
 
     for (var habit in defaultHabits) {
-      _box.put(habit.id, habit);
+      _box.put(habit.id, habit.toJson());
     }
   }
 }

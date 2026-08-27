@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../data/models/currency_type.dart';
-import '../../data/models/subscription_model.dart';
-import 'interactive_glare_card.dart';
+import 'package:trackify/subscription/data/models/currency_type.dart';
+import 'package:trackify/subscription/data/models/subscription_model.dart';
+import 'package:trackify/subscription/presentation/widgets/interactive_glare_card.dart';
 
 /// Presentation card displaying subscription specifics, status badge,
 /// linked habit indicators, and underutilization warnings.

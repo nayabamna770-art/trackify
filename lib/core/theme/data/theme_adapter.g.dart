@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import '../../database/hive_types.dart';
+import 'package:trackify/core/database/hive_types.dart';
 
 class ThemeStateDto {
   final String paletteId;

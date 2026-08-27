@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../data/habit_repository.dart';
-import '../domains/models/habit_model.dart';
+import 'package:trackify/habit/data/habit_repository.dart';
+import 'package:trackify/habit/domains/models/habit_model.dart';
 
 /// Immutable state container for the Habit feature utilizing Equatable
 /// to prevent unnecessary UI rebuilds.

@@ -1,5 +1,5 @@
-import '../models/currency_type.dart';
-import '../models/subscription_model.dart';
+import 'package:trackify/subscription/data/models/currency_type.dart';
+import 'package:trackify/subscription/data/models/subscription_model.dart';
 
 class SubscriptionRepository {
   List<SubscriptionModel> fetchInitialSubscriptions() {

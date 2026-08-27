@@ -1,6 +1,7 @@
-// Fixed relative imports pointing to feature models
-import '../../../../habit/domains/models/habit_model.dart';
-import '../../../../subscription/data/models/subscription_model.dart';
+import 'package:flutter/material.dart';
+// Fixed absolute imports pointing to feature models
+import 'package:trackify/habit/domains/models/habit_model.dart';
+import 'package:trackify/subscription/data/models/subscription_model.dart';
 
 /// Pre-configured catalogs for role-based onboarding choices
 class DefaultCatalogs {
@@ -8,74 +9,30 @@ class DefaultCatalogs {
     switch (role.toLowerCase()) {
       case 'student':
         return [
-          HabitModel(id: 'h_ex', title: 'Exercise', category: 'Health', iconName: 'fitness_center'),
-          HabitModel(
-              id: 'h_code',
-              title: 'Coding',
-              category: 'Productivity',
-              iconName: 'code',
-              linkedSubscriptionId: 's_leetcode'),
-          HabitModel(id: 'h_walk', title: 'Walk', category: 'Health', iconName: 'directions_walk'),
-          HabitModel(id: 'h_paint', title: 'Painting', category: 'Hobby', iconName: 'palette'),
-          HabitModel(
-              id: 'h_study',
-              title: 'Study Session',
-              category: 'Education',
-              iconName: 'menu_book',
-              linkedSubscriptionId: 's_coursera'),
-          HabitModel(
-              id: 'h_skill', title: 'Skill Practice', category: 'Education', iconName: 'psychology'),
+          HabitModel(id: 'h_ex', name: 'Exercise', category: 'Health', streak: 1, isCompletedToday: false, type: 'health'),
+          HabitModel(id: 'h_code', name: 'Coding', category: 'Productivity', streak: 1, isCompletedToday: false, type: 'productivity'),
+          HabitModel(id: 'h_walk', name: 'Walk', category: 'Health', streak: 1, isCompletedToday: false, type: 'health'),
+          HabitModel(id: 'h_paint', name: 'Painting', category: 'Hobby', streak: 1, isCompletedToday: false, type: 'hobby'),
+          HabitModel(id: 'h_study', name: 'Study Session', category: 'Education', streak: 1, isCompletedToday: false, type: 'education'),
+          HabitModel(id: 'h_skill', name: 'Skill Practice', category: 'Education', streak: 1, isCompletedToday: false, type: 'education'),
         ];
       case 'job person':
         return [
-          HabitModel(id: 'h_office', title: 'Office Work', category: 'Productivity', iconName: 'work'),
-          HabitModel(
-              id: 'h_gym',
-              title: 'Gym',
-              category: 'Health',
-              iconName: 'fitness_center',
-              linkedSubscriptionId: 's_gym'),
-          HabitModel(
-              id: 'h_coffee',
-              title: 'Morning Coffee Walk',
-              category: 'Health',
-              iconName: 'local_cafe'),
-          HabitModel(
-              id: 'h_upskill',
-              title: 'Upskilling',
-              category: 'Education',
-              iconName: 'laptop_mac',
-              linkedSubscriptionId: 's_coursera'),
-          HabitModel(
-              id: 'h_meditate',
-              title: 'Meditation',
-              category: 'Health',
-              iconName: 'self_improvement'),
-          HabitModel(
-              id: 'h_inbox', title: 'Inbox Zero', category: 'Productivity', iconName: 'mark_email_read'),
+          HabitModel(id: 'h_office', name: 'Office Work', category: 'Productivity', streak: 1, isCompletedToday: false, type: 'productivity'),
+          HabitModel(id: 'h_gym', name: 'Gym', category: 'Health', streak: 1, isCompletedToday: false, type: 'health'),
+          HabitModel(id: 'h_coffee', name: 'Morning Coffee Walk', category: 'Health', streak: 1, isCompletedToday: false, type: 'health'),
+          HabitModel(id: 'h_upskill', name: 'Upskilling', category: 'Education', streak: 1, isCompletedToday: false, type: 'education'),
+          HabitModel(id: 'h_meditate', name: 'Meditation', category: 'Health', streak: 1, isCompletedToday: false, type: 'health'),
+          HabitModel(id: 'h_inbox', name: 'Inbox Zero', category: 'Productivity', streak: 1, isCompletedToday: false, type: 'productivity'),
         ];
       default:
         return [
-          HabitModel(
-              id: 'h_water', title: 'Water Tracker', category: 'Health', iconName: 'water_drop'),
-          HabitModel(id: 'h_read', title: 'Daily Reading', category: 'Education', iconName: 'book'),
-          HabitModel(
-              id: 'h_journal', title: 'Journaling', category: 'Personal', iconName: 'edit_note'),
-          HabitModel(
-              id: 'h_eve_walk',
-              title: 'Evening Walk',
-              category: 'Health',
-              iconName: 'directions_walk'),
-          HabitModel(
-              id: 'h_stretch',
-              title: 'Stretch Break',
-              category: 'Health',
-              iconName: 'accessibility_new'),
-          HabitModel(
-              id: 'h_audit',
-              title: 'Financial Audit',
-              category: 'Finance',
-              iconName: 'account_balance_wallet'),
+          HabitModel(id: 'h_water', name: 'Water Tracker', category: 'Health', streak: 1, isCompletedToday: false, type: 'health'),
+          HabitModel(id: 'h_read', name: 'Daily Reading', category: 'Education', streak: 1, isCompletedToday: false, type: 'education'),
+          HabitModel(id: 'h_journal', name: 'Journaling', category: 'Personal', streak: 1, isCompletedToday: false, type: 'personal'),
+          HabitModel(id: 'h_eve_walk', name: 'Evening Walk', category: 'Health', streak: 1, isCompletedToday: false, type: 'health'),
+          HabitModel(id: 'h_stretch', name: 'Stretch Break', category: 'Health', streak: 1, isCompletedToday: false, type: 'health'),
+          HabitModel(id: 'h_audit', name: 'Financial Audit', category: 'Finance', streak: 1, isCompletedToday: false, type: 'finance'),
         ];
     }
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import '../../core/database/boxes.dart';
-import '../domains/models/habit_model.dart';
+import 'package:trackify/core/database/boxes.dart';
+import 'package:trackify/habit/domains/models/habit_model.dart';
 
 class HabitRepository {
   Box get _box => Boxes.habitsBox;
@@ -32,29 +32,29 @@ class HabitRepository {
     final defaultHabits = [
       HabitModel(
         id: '1',
-        title: 'Deep Work & Coding',
+        name: 'Deep Work & Coding',
         category: 'Productivity',
-        icon: Icons.code,
-        streakCount: 18,
+        streak: 18,
         isCompletedToday: true,
+        type: 'productivity',
         weeklyProgress: const [true, true, true, true, true, true, true],
       ),
       HabitModel(
         id: '2',
-        title: 'Quantum Physics Reading',
+        name: 'Quantum Physics Reading',
         category: 'Education',
-        icon: Icons.menu_book,
-        streakCount: 5,
+        streak: 5,
         isCompletedToday: false,
+        type: 'education',
         weeklyProgress: const [true, false, true, true, true, false, false],
       ),
       HabitModel(
         id: '3',
-        title: 'Gym & Core Strength',
+        name: 'Gym & Core Strength',
         category: 'Health',
-        icon: Icons.fitness_center,
-        streakCount: 12,
+        streak: 12,
         isCompletedToday: true,
+        type: 'health',
         weeklyProgress: const [true, true, false, true, true, true, true],
       ),
     ];

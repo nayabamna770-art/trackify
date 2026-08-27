@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../data/theme_repository.dart';
-import '../theme_state.dart';
+import 'package:trackify/core/theme/data/theme_repository.dart';
+import 'package:trackify/core/theme/theme_state.dart';
 
 class ThemeCubit extends Cubit<ThemeState> {
   final ThemeRepository repository;

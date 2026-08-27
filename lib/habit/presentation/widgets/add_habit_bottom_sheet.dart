@@ -184,7 +184,7 @@ class _AddHabitBottomSheetState extends State<AddHabitBottomSheet>
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       dropdownColor: Colors.grey[900],
-                      initialValue: _selectedSubscription,
+                      value: _selectedSubscription,
                       hint: Text(
                         'Select Subscription',
                         style: TextStyle(color: palette.textPrimary),
@@ -248,18 +248,16 @@ class _AddHabitBottomSheetState extends State<AddHabitBottomSheet>
                           onTap: () {
                             if (_titleController.text.trim().isNotEmpty) {
                               HapticFeedback.lightImpact();
+                              final categoryText = _categoryController.text.trim().isEmpty
+                                  ? 'General'
+                                  : _categoryController.text.trim();
                               final habit = HabitModel(
-                                id: DateTime.now()
-                                    .millisecondsSinceEpoch
-                                    .toString(),
-                                title: _titleController.text.trim(),
-                                category:
-                                    _categoryController.text.trim().isEmpty
-                                        ? 'General'
-                                        : _categoryController.text.trim(),
-                                icon: Icons.star_outline,
-                                streakCount: 0,
+                                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                                name: _titleController.text.trim(),
+                                category: categoryText,
+                                streak: 0,
                                 isCompletedToday: false,
+                                type: categoryText.toLowerCase(),
                                 weeklyProgress: const [
                                   false,
                                   false,
@@ -269,10 +267,6 @@ class _AddHabitBottomSheetState extends State<AddHabitBottomSheet>
                                   false,
                                   false
                                 ],
-                                defaultTimerMinutes:
-                                    int.tryParse(_durationController.text) ??
-                                        25,
-                                linkedSubscriptionName: _selectedSubscription,
                               );
                               widget.onSave(habit);
                               Navigator.pop(context);

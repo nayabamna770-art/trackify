@@ -111,7 +111,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: const Color(0xFF1E1E30).withOpacity(0.6),
+            color: const Color(0xFF1E1E30).withValues(alpha: 0.6),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: const Color(0xFF00F2FE).withOpacity(0.2),
@@ -135,15 +135,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF1E1E30).withOpacity(0.6),
+            color: const Color(0xFF1E1E30).withValues(alpha: 0.6),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: const Color(0xFF00F2FE).withOpacity(0.15),
+              color: const Color(0xFF00F2FE).withValues(alpha: 0.15),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.4),
+                color: Colors.black.withValues(alpha: 0.4),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -216,7 +216,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       trailing: Switch.adaptive(
         value: value,
         activeColor: const Color(0xFF00F2FE),
-        activeTrackColor: const Color(0xFF00F2FE).withOpacity(0.3),
+        activeTrackColor: const Color(0xFF00F2FE).withValues(alpha: 0.3),
         inactiveThumbColor: const Color(0xFF8E8EA9),
         inactiveTrackColor: const Color(0xFF1E1E30),
         onChanged: onChanged,
@@ -229,7 +229,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: const Color(0xFF00F2FE).withOpacity(0.1),
+        color: const Color(0xFF00F2FE).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: const Color(0xFF00F2FE).withOpacity(0.2),

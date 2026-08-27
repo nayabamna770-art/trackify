@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../habit/domains/models/habit_model.dart';
-import '../data/models/subscription_model.dart';
-import '../data/subscription_repository.dart';
-import 'subscription_state.dart';
+import 'package:trackify/habit/domains/models/habit_model.dart';
+import 'package:trackify/subscription/data/models/subscription_model.dart';
+import 'package:trackify/subscription/data/subscription_repository.dart';
+import 'package:trackify/subscription/logic/subscription_state.dart';
 
 class SubscriptionCubit extends Cubit<SubscriptionState> {
   final SubscriptionRepository repository;

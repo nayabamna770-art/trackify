@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../features/onboarding/presentation/pages/splash_screen.dart';
+import 'package:trackify/features/onboarding/presentation/pages/splash_screen.dart';
 
 /// Root application widget wrapper
 class App extends StatelessWidget {

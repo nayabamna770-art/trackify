@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../data/models/subscription_model.dart';
+import 'package:trackify/subscription/data/models/subscription_model.dart';
 
 /// Available UI filters for the Subscription screen list.
 enum SubscriptionFilter { all, active, needsAttention, habitLinked }

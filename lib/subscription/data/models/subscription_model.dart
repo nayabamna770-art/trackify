@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
-import 'currency_type.dart';
+import 'package:trackify/subscription/data/models/currency_type.dart';
 
 part '../subscription_adapter.g.dart';
 

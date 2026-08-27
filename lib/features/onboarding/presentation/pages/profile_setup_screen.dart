@@ -9,7 +9,6 @@ import 'package:trackify/core/theme/logic/theme_cubit.dart';
 // Import reusable glass container component
 import 'package:trackify/core/widgets/glass_container.dart';
 // Import project storage box constants
-import 'package:trackify/core/database/boxes.dart'; // Adjust path if needed based on your structure
 import 'package:trackify/features/onboarding/presentation/pages/main_shell_screen.dart';
 
 /// ProfileSetupScreen captures the new user's name and role (Job/Student)
@@ -128,8 +127,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   ),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
-                    value: _selectedRole,
-                    dropdownColor: palette.background,
+                    initialValue: _selectedRole,
+                    dropdownColor: const Color(0xFF141A26),
                     items: _roles.map((role) {
                       return DropdownMenuItem(
                         value: role,

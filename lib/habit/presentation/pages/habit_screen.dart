@@ -1,103 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trackify/app/constants/app_glass_style.dart';
 import 'package:trackify/core/theme/logic/theme_cubit.dart';
 import 'package:trackify/core/theme/theme_state.dart';
-import 'package:trackify/core/widgets/glass_container.dart';
-import 'package:trackify/core/widgets/spring_scale_button.dart';
-import 'package:trackify/habit/bloc/habit_cubit.dart';
-import 'package:trackify/habit/presentation/widgets/add_habit_bottom_sheet.dart';
-import 'package:trackify/habit/presentation/widgets/appreciation_card_dialog.dart';
-import 'package:trackify/habit/presentation/widgets/current_task_timer_bottom_sheet.dart';
-import 'package:trackify/habit/presentation/widgets/habit_card.dart';
+import 'package:trackify/habit/presentation/pages/configure_habit_screen.dart';
 
-/// Screen displaying active routines, daily task timers, and habit metrics.
-class HabitsScreen extends StatelessWidget {
-  const HabitsScreen({super.key});
+class HabitScreen extends StatefulWidget {
+  const HabitScreen({super.key});
 
-  /// Displays the modal sheet for adding a new routine/habit.
-  void _showAddHabitModal(
-      BuildContext context, dynamic palette, double opacity) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: 'Add Habit',
-      barrierColor: Colors.black.withValues(alpha: 0.6),
-      transitionDuration: const Duration(milliseconds: 350),
-      pageBuilder: (dialogContext, animation, secondaryAnimation) {
-        return Center(
-          child: Material(
-            color: Colors.transparent,
-            child: AddHabitBottomSheet(
-              palette: palette,
-              opacity: opacity,
-              onSave: (newHabit) {
-                context.read<HabitCubit>().addHabit(newHabit);
-              },
-            ),
-          ),
-        );
-      },
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        final curvedAnimation = CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeOutBack,
-        );
-        return ScaleTransition(
-          scale: curvedAnimation,
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
-        );
-      },
+  @override
+  State<HabitScreen> createState() => _HabitScreenState();
+}
+
+class _HabitScreenState extends State<HabitScreen> {
+  // Local state list to hold newly created active habits instantly
+  final List<Map<String, dynamic>> _userHabits = [];
+
+  // Directly navigate to ConfigureHabitScreen, bypassing the redundant welcome screen
+  Future<void> _navigateToConfigureHabit(BuildContext context) async {
+    final newHabitData = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ConfigureHabitScreen(),
+      ),
     );
-  }
 
-  /// Displays the task countdown timer modal.
-  void _showCurrentTaskTimerModal(
-      BuildContext context, dynamic palette, double opacity) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierLabel: 'Current Task Timer',
-      barrierColor: Colors.black.withValues(alpha: 0.6),
-      transitionDuration: const Duration(milliseconds: 350),
-      pageBuilder: (dialogContext, animation, secondaryAnimation) {
-        return Center(
-          child: Material(
-            color: Colors.transparent,
-            child: CurrentTaskTimerBottomSheet(
-              palette: palette,
-              opacity: opacity,
-              onTimerComplete: (taskTitle, durationMinutes) {
-                showDialog(
-                  context: context,
-                  builder: (dialogContext) => AppreciationCardDialog(
-                    taskTitle: taskTitle,
-                    minutes: durationMinutes,
-                    palette: palette,
-                    opacity: opacity,
-                  ),
-                );
-              },
-            ),
-          ),
-        );
-      },
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        final curvedAnimation = CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeOutBack,
-        );
-        return ScaleTransition(
-          scale: curvedAnimation,
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
-        );
-      },
-    );
+    // If data is returned, update the state so it immediately appears as an active card
+    if (newHabitData != null) {
+      setState(() {
+        _userHabits.add(newHabitData);
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Successfully created "${newHabitData['name']}"!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
   @override
@@ -106,121 +47,197 @@ class HabitsScreen extends StatelessWidget {
       builder: (context, themeState) {
         final palette = themeState.currentPalette;
 
-        return BlocBuilder<HabitCubit, HabitState>(
-          builder: (context, habitState) {
-            return Scaffold(
-              backgroundColor: Colors.transparent,
-              body: ListView(
-                padding: const EdgeInsets.only(
-                  left: 20,
-                  right: 20,
-                  top: 10,
-                  bottom: 120,
-                ),
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Active Routines',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: palette.textHeading,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Consistency is your compounding edge',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: palette.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Row(
-                        children: [
-                          SpringScaleButton(
-                            onTap: () => _showCurrentTaskTimerModal(
-                                context, palette, themeState.glassOpacity),
-                            child: GlassContainer(
-                              borderRadius: 14,
-                              opacity: themeState.glassOpacity,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 12),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.timer_outlined,
-                                    color: palette.accentPrimary,
-                                    size: 18,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Task',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: palette.accentPrimary,
-                                    ),
-                                  ),
-                                ],
-                              ),
+        return Scaffold(
+          backgroundColor: const Color(0xFF0B0F17),
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            title: Text(
+              'Habits Dashboard',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: palette.textHeading,
+              ),
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.add_rounded, color: palette.accentPrimary),
+                onPressed: () => _navigateToConfigureHabit(context),
+                tooltip: 'Add New Habit',
+              ),
+            ],
+          ),
+          body: _userHabits.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: palette.accentPrimary.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: palette.accentPrimary.withValues(alpha: 0.3),
+                              width: AppGlassStyle.borderWidth,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          SpringScaleButton(
-                            onTap: () => _showAddHabitModal(
-                                context, palette, themeState.glassOpacity),
-                            child: GlassContainer(
-                              borderRadius: 14,
-                              opacity: themeState.glassOpacity,
-                              padding: const EdgeInsets.all(12),
-                              child: Icon(
-                                Icons.add,
-                                color: palette.accentPrimary,
-                                size: 20,
-                              ),
+                          child: Icon(
+                            Icons.track_changes_rounded,
+                            size: 48,
+                            color: palette.accentPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          'No Active Routines',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Tap the button below to configure and track your first habit instantly.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.white70,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: palette.accentPrimary,
+                            foregroundColor: Colors.black,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 4,
+                          ),
+                          onPressed: () => _navigateToConfigureHabit(context),
+                          icon: const Icon(Icons.add_rounded),
+                          label: const Text(
+                            'Add New Habit',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(20.0),
+                  itemCount: _userHabits.length,
+                  itemBuilder: (context, index) {
+                    final habit = _userHabits[index];
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF141A26),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: palette.accentPrimary.withValues(alpha: 0.4),
+                          width: AppGlassStyle.borderWidth,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: palette.accentPrimary.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Icon(
+                              Icons.star_rounded,
+                              color: palette.accentPrimary,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  habit['name'] ?? '',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: palette.textHeading,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  habit['description']?.isNotEmpty == true
+                                      ? habit['description']
+                                      : 'No description provided',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    _buildBadge(
+                                      habit['type'] ?? 'General',
+                                      palette.accentPrimary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _buildBadge(
+                                      habit['goalPeriod'] ?? 'Day-Long',
+                                      Colors.blueAccent,
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  ...habitState.habits.map(
-                    (habit) => Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
-                      child: HabitCard(
-                        title: habit.title,
-                        category: habit.category,
-                        icon: habit.icon,
-                        streak: '${habit.streakCount} Day Streak',
-                        isCompleted: habit.isCompletedToday,
-                        progress: habit.weeklyProgress,
-                        onToggleComplete: () {
-                          context
-                              .read<HabitCubit>()
-                              .toggleHabitCompletion(habit.id);
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+                    );
+                  },
+                ),
+          floatingActionButton: _userHabits.isNotEmpty
+              ? FloatingActionButton(
+                  backgroundColor: palette.accentPrimary,
+                  foregroundColor: Colors.black,
+                  onPressed: () => _navigateToConfigureHabit(context),
+                  child: const Icon(Icons.add_rounded, size: 28),
+                )
+              : null,
         );
       },
+    );
+  }
+
+  Widget _buildBadge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: color,
+        ),
+      ),
     );
   }
 }

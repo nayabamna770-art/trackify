@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
-import '../../core/database/boxes.dart';
-import 'models/currency_type.dart';
-import 'models/subscription_model.dart';
+import 'package:trackify/core/database/boxes.dart';
+import 'package:trackify/subscription/data/models/currency_type.dart';
+import 'package:trackify/subscription/data/models/subscription_model.dart';
 
 class SubscriptionRepository {
   Box<SubscriptionModel> get _box => Boxes.subscriptionsBox;

@@ -1,33 +1,38 @@
-import 'package:hive_flutter/hive_flutter.dart';
-import 'boxes.dart';
-import '../theme/data/theme_adapter.g.dart';
-// Note: Ensure habit and subscription adapters are imported if they use generated adapters:
-// import '../../habit/domains/models/habit_model.adapter.g.dart';
-// import '../../subscription/data/models/subscription_model.adapter.g.dart';
-import '../../habit/domains/models/habit_model.dart';
-import '../../subscription/data/models/subscription_model.dart';
-/// Responsible for initializing local Hive storage, registering model adapters,
-/// and pre-opening all data boxes required by the app before UI launch.
-class HiveService {
-  static Future<void> init() async {
-    // Initialize Hive for Flutter local storage directory access
-    await Hive.initFlutter();
+import 'package:hive/hive.dart';
+import 'package:trackify/habit/domains/models/habit_model.dart';
+import 'package:trackify/core/database/boxes.dart';
+class HabitLocalStorage {
+  static const String _boxName = 'habits_box';
 
-    // =========================================================================
-    // 1. Register Type Adapters (Mapped via HiveTypes indices)
-    // =========================================================================
-    Hive.registerAdapter(ThemeStateAdapter());
-    // TODO: Register other feature adapters here as needed:
-    // Hive.registerAdapter(HabitModelAdapter());
-    // Hive.registerAdapter(SubscriptionModelAdapter());
+  static Future<Box> _openBox() async {
+    if (!Hive.isBoxOpen(_boxName)) {
+      return await Hive.openBox(_boxName);
+    }
+    return Hive.box(_boxName);
+  }
 
-    // =========================================================================
-    // 2. Open All Application Data Boxes
-    // =========================================================================
-    await Future.wait([
-      Hive.openBox(HiveBoxes.theme),
-      Hive.openBox<HabitModel>(Boxes.habitsBoxName),
-      Hive.openBox<SubscriptionModel>(Boxes.subscriptionsBoxName),
-    ]);
+  static Future<void> saveHabits(List<HabitModel> habits) async {
+    final box = await _openBox();
+    final jsonList = habits.map((h) => h.toJson()).toList();
+    await box.put('user_habits', jsonList);
+  }
+
+  static Future<List<HabitModel>> loadHabits() async {
+    final box = await _openBox();
+    final dynamic rawData = box.get('user_habits');
+
+    if (rawData == null) return [];
+
+    try {
+      // Safely cast raw elements to Map<String, dynamic>
+      final List<dynamic> list = rawData;
+      return list.map((item) {
+        final Map<String, dynamic> mapItem =
+            Map<String, dynamic>.from(item as Map);
+        return HabitModel.fromJson(mapItem);
+      }).toList();
+    } catch (e) {
+      return [];
+    }
   }
 }

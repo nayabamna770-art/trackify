@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../core/theme/logic/theme_cubit.dart';
-import '../../../../core/theme/theme_state.dart';
-import '../../../../core/widgets/spring_scale_button.dart';
-import '../../../habit/bloc/habit_cubit.dart';
-import '../../data/models/subscription_model.dart';
-import '../../logic/subscription_cubit.dart';
-import '../../logic/subscription_state.dart';
-import '../widgets/add_subscription_bottom_sheet.dart';
-import '../widgets/subscription_card.dart';
+import 'package:trackify/core/theme/logic/theme_cubit.dart';
+import 'package:trackify/core/theme/theme_state.dart';
+import 'package:trackify/core/widgets/spring_scale_button.dart';
+import 'package:trackify/habit/bloc/habit_cubit.dart';
+import 'package:trackify/subscription/data/models/subscription_model.dart';
+import 'package:trackify/subscription/logic/subscription_cubit.dart';
+import 'package:trackify/subscription/logic/subscription_state.dart';
+import 'package:trackify/subscription/presentation/widgets/add_subscription_bottom_sheet.dart';
+import 'package:trackify/subscription/presentation/widgets/subscription_card.dart';
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});

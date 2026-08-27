@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/models/currency_type.dart';
-import '../../data/models/subscription_model.dart';
-import '../../logic/subscription_cubit.dart';
-import '../../../habit/bloc/habit_cubit.dart';
-import '../../../habit/domains/models/habit_model.dart';
+import 'package:trackify/subscription/data/models/currency_type.dart';
+import 'package:trackify/subscription/data/models/subscription_model.dart';
+import 'package:trackify/subscription/logic/subscription_cubit.dart';
+import 'package:trackify/habit/bloc/habit_cubit.dart';
+import 'package:trackify/habit/domains/models/habit_model.dart';
 
 class AddSubscriptionDialog extends StatefulWidget {
   final Color primaryAccent;

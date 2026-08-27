@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../../app/constants/app_glass_style.dart';
+import 'package:trackify/app/constants/app_glass_style.dart';
 
 class GlassContainer extends StatelessWidget {
   final Widget child;

@@ -4,19 +4,14 @@ import 'package:trackify/app/constants/app_glass_style.dart';
 import 'package:trackify/core/theme/logic/theme_cubit.dart';
 import 'package:trackify/core/theme/theme_state.dart';
 
-class SettingHabitScreen extends StatefulWidget {
-  final String? initialHabitName;
-
-  const SettingHabitScreen({
-    super.key,
-    this.initialHabitName,
-  });
+class ConfigureHabitScreen extends StatefulWidget {
+  const ConfigureHabitScreen({super.key});
 
   @override
-  State<SettingHabitScreen> createState() => _SettingHabitScreenState();
+  State<ConfigureHabitScreen> createState() => _ConfigureHabitScreenState();
 }
 
-class _SettingHabitScreenState extends State<SettingHabitScreen> {
+class _ConfigureHabitScreenState extends State<ConfigureHabitScreen> {
   late final TextEditingController _nameController;
   late final TextEditingController _descController;
 
@@ -27,12 +22,9 @@ class _SettingHabitScreenState extends State<SettingHabitScreen> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(
-      text: widget.initialHabitName ?? 'New Routine',
-    );
-    _descController = TextEditingController(
-      text: 'Stay consistent and build momentum',
-    );
+    _nameController = TextEditingController(text: 'New Routine');
+    _descController =
+        TextEditingController(text: 'Stay consistent and build momentum');
   }
 
   @override
@@ -54,7 +46,7 @@ class _SettingHabitScreenState extends State<SettingHabitScreen> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             title: Text(
-              'Habit Settings',
+              'Configure Habit',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -83,7 +75,7 @@ class _SettingHabitScreenState extends State<SettingHabitScreen> {
                         ),
                       ),
                       child: Icon(
-                        Icons.tune_rounded,
+                        Icons.star_rounded,
                         color: palette.accentPrimary,
                         size: 28,
                       ),
@@ -103,8 +95,7 @@ class _SettingHabitScreenState extends State<SettingHabitScreen> {
                             decoration: InputDecoration(
                               hintText: 'Habit name',
                               hintStyle: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.4),
-                              ),
+                                  color: Colors.white.withValues(alpha: 0.4)),
                               border: InputBorder.none,
                               isDense: true,
                             ),
@@ -113,14 +104,11 @@ class _SettingHabitScreenState extends State<SettingHabitScreen> {
                           TextField(
                             controller: _descController,
                             style: const TextStyle(
-                              fontSize: 13,
-                              color: Colors.white70,
-                            ),
+                                fontSize: 13, color: Colors.white70),
                             decoration: InputDecoration(
                               hintText: 'Description (Optional)',
                               hintStyle: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.4),
-                              ),
+                                  color: Colors.white.withValues(alpha: 0.4)),
                               border: InputBorder.none,
                               isDense: true,
                             ),
@@ -149,7 +137,7 @@ class _SettingHabitScreenState extends State<SettingHabitScreen> {
                           'Education',
                           'Health',
                           'Fitness',
-                          'Mindfulness',
+                          'Mindfulness'
                         ],
                         currentSelected: _selectedHabitType,
                         accentColor: palette.accentPrimary,
@@ -185,7 +173,7 @@ class _SettingHabitScreenState extends State<SettingHabitScreen> {
                         options: const [
                           'Every Day',
                           'Weekdays Only',
-                          'Weekends Only',
+                          'Weekends Only'
                         ],
                         currentSelected: _selectedTaskDays,
                         accentColor: palette.accentPrimary,
@@ -214,13 +202,12 @@ class _SettingHabitScreenState extends State<SettingHabitScreen> {
                     if (_nameController.text.trim().isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Please enter a habit name'),
-                        ),
+                            content: Text('Please enter a habit name')),
                       );
                       return;
                     }
 
-                    final habitSettingsData = {
+                    final habitData = {
                       'name': _nameController.text.trim(),
                       'description': _descController.text.trim(),
                       'type': _selectedHabitType,
@@ -228,14 +215,11 @@ class _SettingHabitScreenState extends State<SettingHabitScreen> {
                       'taskDays': _selectedTaskDays,
                     };
 
-                    Navigator.pop(context, habitSettingsData);
+                    Navigator.pop(context, habitData);
                   },
                   child: const Text(
-                    'Save Habit Settings',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'Save Habit Configuration',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),

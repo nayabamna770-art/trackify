@@ -35,11 +35,12 @@ class _SplashScreenState extends State<SplashScreen> {
 
     // Open user profile box to check onboarding status
     final profileBox = await Hive.openBox('user_profile_box');
-    final bool hasCompletedOnboarding = profileBox.get('has_completed_onboarding', defaultValue: false);
+    final bool hasCompletedOnboarding =
+        profileBox.get('has_completed_onboarding', defaultValue: false);
 
     // Conditional routing based on whether user is new or returning
-    Widget targetScreen = hasCompletedOnboarding 
-        ? const MainScreenShell() 
+    Widget targetScreen = hasCompletedOnboarding
+        ? const MainScreenShell()
         : const ProfileSetupScreen();
 
     Navigator.of(context).pushReplacement(

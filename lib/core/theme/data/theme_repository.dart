@@ -1,10 +1,9 @@
-import 'package:hive_flutter/hive_flutter.dart';
-import '../../database/boxes.dart';
-import 'theme_adapter.g.dart';
+import 'package:hive/hive.dart';
+import 'package:trackify/core/database/boxes.dart';
+import 'package:trackify/core/theme/data/theme_adapter.g.dart';
 
 class ThemeRepository {
-  Box get _box => Hive.box(HiveBoxes.theme);
-
+  Box<ThemeStateDto> get _box => Boxes.themeBox;
   static const String _key = 'current_theme';
 
   Future<void> saveTheme({
@@ -19,6 +18,6 @@ class ThemeRepository {
   }
 
   ThemeStateDto? getSavedTheme() {
-    return _box.get(_key) as ThemeStateDto?;
+    return _box.get(_key);
   }
 }

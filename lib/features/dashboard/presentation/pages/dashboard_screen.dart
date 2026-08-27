@@ -168,7 +168,8 @@ class DashboardScreen extends StatelessWidget {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => SettingHabitScreen(
-                                    habitName: habit['name']!,
+                                    initialHabitName: habit[
+                                        'name']!, // Corrected parameter name
                                   ),
                                 ),
                               );

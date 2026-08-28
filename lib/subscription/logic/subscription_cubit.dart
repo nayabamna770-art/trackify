@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trackify/core/services/home_widget_service.dart';
 import 'package:trackify/habit/domains/models/habit_model.dart';
 import 'package:trackify/subscription/data/models/subscription_model.dart';
 import 'package:trackify/subscription/data/subscription_repository.dart';
@@ -18,6 +19,7 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
       subscriptions: data,
       status: SubscriptionStatus.loaded,
     ));
+    HomeWidgetService.updateWidgets(subscriptions: data);
   }
 
   void setFilter(SubscriptionFilter filter) {
@@ -67,6 +69,7 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
       subscriptions: freshData,
       status: SubscriptionStatus.loaded,
     ));
+    HomeWidgetService.updateWidgets(subscriptions: freshData);
   }
 
   void deleteSubscription(String id) async {
@@ -76,6 +79,7 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
       subscriptions: freshData,
       status: SubscriptionStatus.loaded,
     ));
+    HomeWidgetService.updateWidgets(subscriptions: freshData);
   }
 
   void renewSubscription(SubscriptionModel sub) async {
@@ -92,5 +96,6 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
       subscriptions: freshData,
       status: SubscriptionStatus.loaded,
     ));
+    HomeWidgetService.updateWidgets(subscriptions: freshData);
   }
 }

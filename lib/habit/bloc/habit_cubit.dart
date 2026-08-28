@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trackify/core/services/home_widget_service.dart';
 import 'package:trackify/habit/data/habit_repository.dart';
 import 'package:trackify/habit/domains/models/habit_model.dart';
 
@@ -25,12 +26,15 @@ class HabitCubit extends Cubit<HabitState> {
   final HabitRepository repository;
 
   HabitCubit({required this.repository})
-      : super(HabitState(habits: repository.getHabits()));
+      : super(HabitState(habits: repository.getHabits())) {
+    HomeWidgetService.updateHabitWidget(state.habits);
+  }
 
   /// Reloads habits directly from local storage sync bounds.
   void loadHabits() {
     final habits = repository.getHabits();
     emit(state.copyWith(habits: habits));
+    HomeWidgetService.updateHabitWidget(habits);
   }
 
   /// Toggles completion status for today, updates weekly matrix, adjusts streaks, 
@@ -63,6 +67,7 @@ class HabitCubit extends Cubit<HabitState> {
     }).toList();
 
     emit(state.copyWith(habits: updatedHabits));
+    HomeWidgetService.updateHabitWidget(updatedHabits);
   }
 
   /// Convenience alias for toggleHabitCompletion.
@@ -71,6 +76,8 @@ class HabitCubit extends Cubit<HabitState> {
   /// Registers a new habit entry inside local storage and publishes the updated list state.
   void addHabit(HabitModel newHabit) {
     repository.saveHabit(newHabit);
-    emit(state.copyWith(habits: [...state.habits, newHabit]));
+    final updatedHabits = [...state.habits, newHabit];
+    emit(state.copyWith(habits: updatedHabits));
+    HomeWidgetService.updateHabitWidget(updatedHabits);
   }
 }

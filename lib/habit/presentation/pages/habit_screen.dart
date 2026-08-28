@@ -211,7 +211,12 @@ class HabitScreen extends StatelessWidget {
                       ),
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.all(20.0),
+                      padding: const EdgeInsets.only(
+                        left: 20.0,
+                        right: 20.0,
+                        top: 16.0,
+                        bottom: 110.0,
+                      ),
                       itemCount: habits.length,
                       itemBuilder: (context, index) {
                         final habit = habits[index];
@@ -231,18 +236,6 @@ class HabitScreen extends StatelessWidget {
                         );
                       },
                     ),
-              floatingActionButton: habits.isNotEmpty
-                  ? FloatingActionButton.extended(
-                      backgroundColor: palette.accentPrimary,
-                      foregroundColor: Colors.black,
-                      onPressed: () => _navigateToConfigureHabit(context),
-                      icon: const Icon(Icons.add_rounded, size: 24),
-                      label: const Text(
-                        'New Habit',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  : null,
             );
           },
         );

@@ -28,6 +28,7 @@ dependencies:
   # Micro-Animations & Haptics
   flutter_animate: ^4.5.0
   confetti: ^0.7.0
+  home_widget: ^0.9.3
 
 dev_dependencies:
   flutter_test:

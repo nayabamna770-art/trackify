@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:trackify/core/services/home_widget_service.dart';
 import 'package:trackify/core/theme/logic/theme_cubit.dart';
 import 'package:trackify/core/theme/theme_state.dart';
 import 'package:trackify/core/widgets/spring_scale_button.dart';
@@ -18,6 +20,7 @@ class MainScreenShell extends StatefulWidget {
 
 class _MainScreenShellState extends State<MainScreenShell> {
   int _currentIndex = 0;
+  StreamSubscription<Uri?>? _widgetClickSubscription;
 
   // Persistent shell screens
   final List<Widget> _screens = [
@@ -25,6 +28,34 @@ class _MainScreenShellState extends State<MainScreenShell> {
     const HabitScreen(),
     const SubscriptionScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _handleWidgetLaunch();
+  }
+
+  Future<void> _handleWidgetLaunch() async {
+    // 1. Initial launch from home widget
+    final initialUri = await HomeWidgetService.getInitiallyLaunchedUri();
+    if (initialUri != null && mounted) {
+      setState(() => _currentIndex = 1); // Open Habits
+    }
+
+    // 2. Runtime clicks from background/foreground
+    _widgetClickSubscription =
+        HomeWidgetService.widgetClickedStream.listen((uri) {
+      if (uri != null && mounted) {
+        setState(() => _currentIndex = 1); // Open Habits
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _widgetClickSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

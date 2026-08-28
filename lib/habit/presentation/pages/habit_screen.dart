@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trackify/app/constants/app_glass_style.dart';
 import 'package:trackify/core/theme/logic/theme_cubit.dart';
@@ -6,12 +7,15 @@ import 'package:trackify/core/theme/theme_state.dart';
 import 'package:trackify/habit/bloc/habit_cubit.dart';
 import 'package:trackify/habit/domains/models/habit_model.dart';
 import 'package:trackify/habit/presentation/pages/configure_habit_screen.dart';
+import 'package:trackify/habit/presentation/widgets/appreciation_card_dialog.dart';
+import 'package:trackify/habit/presentation/widgets/current_task_timer_bottom_sheet.dart';
 import 'package:trackify/habit/presentation/widgets/habit_card.dart';
 
 class HabitScreen extends StatelessWidget {
   const HabitScreen({super.key});
 
   Future<void> _navigateToConfigureHabit(BuildContext context) async {
+    HapticFeedback.lightImpact();
     final newHabit = await Navigator.push<HabitModel>(
       context,
       MaterialPageRoute(
@@ -28,6 +32,31 @@ class HabitScreen extends StatelessWidget {
         ),
       );
     }
+  }
+
+  void _openFocusTimer(BuildContext context, dynamic palette, double opacity) {
+    HapticFeedback.lightImpact();
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => CurrentTaskTimerBottomSheet(
+        palette: palette,
+        opacity: opacity,
+        initialTaskTitle: 'Deep Routine Session',
+        onTimerComplete: (title, mins) {
+          showDialog(
+            context: context,
+            barrierDismissible: true,
+            builder: (dialogCtx) => AppreciationCardDialog(
+              taskTitle: title,
+              minutes: mins,
+              palette: palette,
+              opacity: opacity,
+            ),
+          );
+        },
+      ),
+    );
   }
 
   IconData _getCategoryIcon(String category) {
@@ -58,24 +87,61 @@ class HabitScreen extends StatelessWidget {
             final habits = habitState.habits;
 
             return Scaffold(
-              backgroundColor: const Color(0xFF0B0F17),
+              backgroundColor: const Color(0xFF080C14),
               appBar: AppBar(
                 backgroundColor: Colors.transparent,
                 elevation: 0,
-                title: Text(
-                  'Habits Dashboard',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: palette.textHeading,
-                  ),
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Trackify Your Habit',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: palette.textHeading,
+                      ),
+                    ),
+                    Text(
+                      'Consistency compounds daily',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: palette.textPrimary.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ],
                 ),
                 actions: [
+                  // Current Task Focus Session Button
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6.0),
+                    child: TextButton.icon(
+                      style: TextButton.styleFrom(
+                        backgroundColor: palette.accentPrimary.withValues(alpha: 0.15),
+                        foregroundColor: palette.accentPrimary,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(
+                            color: palette.accentPrimary.withValues(alpha: 0.35),
+                          ),
+                        ),
+                      ),
+                      onPressed: () => _openFocusTimer(context, palette, themeState.glassOpacity),
+                      icon: const Icon(Icons.timer_rounded, size: 16),
+                      label: const Text(
+                        'Current Task',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  // Add New Habit Button
                   IconButton(
-                    icon: Icon(Icons.add_rounded, color: palette.accentPrimary),
+                    icon: Icon(Icons.add_circle_outline_rounded, color: palette.accentPrimary, size: 26),
                     onPressed: () => _navigateToConfigureHabit(context),
                     tooltip: 'Add New Habit',
                   ),
+                  const SizedBox(width: 8),
                 ],
               ),
               body: habits.isEmpty
@@ -166,11 +232,15 @@ class HabitScreen extends StatelessWidget {
                       },
                     ),
               floatingActionButton: habits.isNotEmpty
-                  ? FloatingActionButton(
+                  ? FloatingActionButton.extended(
                       backgroundColor: palette.accentPrimary,
                       foregroundColor: Colors.black,
                       onPressed: () => _navigateToConfigureHabit(context),
-                      child: const Icon(Icons.add_rounded, size: 28),
+                      icon: const Icon(Icons.add_rounded, size: 24),
+                      label: const Text(
+                        'New Habit',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     )
                   : null,
             );

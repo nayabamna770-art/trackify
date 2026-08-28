@@ -1,248 +1,607 @@
-// Import standard Flutter material design package for layout and widget creation
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
-// Import Flutter BLoC package to listen to application state changes reactively
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// Import global glass design styling constants (such as border widths)
+import 'package:hive/hive.dart';
 import 'package:trackify/app/constants/app_glass_style.dart';
-// Import ThemeCubit to manage dynamic theme switching and color palette properties
 import 'package:trackify/core/theme/logic/theme_cubit.dart';
 import 'package:trackify/core/theme/theme_state.dart';
-// Import reusable glassmorphism container wrapper for cards and widgets
 import 'package:trackify/core/widgets/glass_container.dart';
-// Import the settings screen destination for top utility navigation
-import 'package:trackify/settings/presentation/pages/setting_screen.dart';
+import 'package:trackify/core/widgets/spring_scale_button.dart';
+import 'package:trackify/core/widgets/theme_selection_bottom_sheet.dart';
 import 'package:trackify/habit/bloc/habit_cubit.dart';
 import 'package:trackify/habit/domains/models/habit_model.dart';
 import 'package:trackify/habit/presentation/pages/configure_habit_screen.dart';
+import 'package:trackify/settings/presentation/pages/setting_screen.dart';
+import 'package:trackify/subscription/data/models/subscription_model.dart';
+import 'package:trackify/subscription/data/repositories/subscription_repository.dart';
 
-/// DashboardScreen is the primary landing screen displaying the user's daily overview,
-/// common habits, solid activity heatmaps, and subscription renewal matrix.
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Listen to ThemeCubit to rebuild the dashboard when the active theme palette updates
-    return BlocBuilder<ThemeCubit, ThemeState>(
-      builder: (context, themeState) {
-        // Extract the active theme's custom color palette
-        final palette = themeState.currentPalette;
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
 
-        return BlocBuilder<HabitCubit, HabitState>(
-          builder: (context, habitState) {
-            final habits = habitState.habits;
+class _DashboardScreenState extends State<DashboardScreen> {
+  late ConfettiController _confettiController;
+  String _userName = 'Explorer';
+  List<SubscriptionModel> _subscriptions = [];
 
-            // Common habit items for universal student/professional utility
-            final List<Map<String, String>> commonHabits = [
-              {'name': 'Walk / Exercise', 'quote': 'Stay active, stay sharp'},
-              {'name': 'Coding / Focus Work', 'quote': 'Build consistency'},
-              {'name': 'Documentation / Reading', 'quote': 'Knowledge compounds'},
-            ];
+  @override
+  void initState() {
+    super.initState();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 4));
+    _loadUserData();
+  }
 
-            return ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-              children: [
-            // --- TOP UTILITY ROW: SETTINGS ACTION BUTTON ---
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                _HoverPopCard(
-                  child: GlassContainer(
-                    padding: const EdgeInsets.all(4),
-                    borderRadius: 16,
-                    opacity: themeState.glassOpacity,
-                    accentGlowColor: palette.accentPrimary,
-                    child: IconButton(
-                      icon: Icon(Icons.settings, color: palette.textHeading),
-                      tooltip: 'Open Settings',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SettingsScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
+  Future<void> _loadUserData() async {
+    try {
+      final profileBox = await Hive.openBox('user_profile_box');
+      final name = profileBox.get('user_name', defaultValue: 'Friend');
+      final subs = SubscriptionRepository().fetchInitialSubscriptions();
+      if (mounted) {
+        setState(() {
+          _userName = name;
+          _subscriptions = subs;
+        });
+      }
+    } catch (_) {}
+  }
 
-            const SizedBox(height: 8),
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
 
-            // --- TOP ROW: WELCOME CARD WITH NAME & SMILE EMOJI ---
-            _HoverPopCard(
+  void _checkAllCompletedCelebration(List<HabitModel> habits, String toggledHabitId) {
+    // Find what the new state will be after toggle
+    final willBeAllCompleted = habits.every((h) {
+      if (h.id == toggledHabitId) {
+        return !h.isCompletedToday;
+      }
+      return h.isCompletedToday;
+    });
+
+    if (willBeAllCompleted && habits.isNotEmpty) {
+      _confettiController.play();
+      HapticFeedback.heavyImpact();
+      _showMotivationalCelebrationDialog();
+    }
+  }
+
+  void _showMotivationalCelebrationDialog() {
+    final themeState = context.read<ThemeCubit>().state;
+    final palette = themeState.currentPalette;
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 28),
               child: GlassContainer(
-                padding: const EdgeInsets.all(20),
                 borderRadius: 24,
-                opacity: themeState.glassOpacity,
+                opacity: 0.3,
+                padding: const EdgeInsets.all(24),
                 accentGlowColor: palette.accentPrimary,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      'DAILY OVERVIEW',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: palette.accentPrimary.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: palette.accentPrimary,
+                          width: 2,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.local_fire_department_rounded,
+                        size: 44,
                         color: palette.accentPrimary,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 16),
                     Text(
-                      'Welcome Back, Nayab! 😊',
+                      'Flawless Execution! 🔥',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: palette.textHeading,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 10),
                     Text(
-                      'Let us build great momentum today.',
+                      'You conquered 100% of your daily routines today. "Small daily disciplines lead to massive long-term compound success." Keep that streak burning!',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 12,
-                        color: palette.textPrimary.withValues(alpha: 0.8),
+                        fontSize: 13,
+                        color: palette.textPrimary,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SpringScaleButton(
+                      onTap: () => Navigator.pop(ctx),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: palette.accentPrimary,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: palette.accentPrimary.withValues(alpha: 0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: const Text(
+                          'Keep Crushing It!',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
+          ),
+        );
+      },
+    );
+  }
 
-            const SizedBox(height: 24),
+  void _openThemeBottomSheet(BuildContext context) {
+    HapticFeedback.lightImpact();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => const ThemeSelectionBottomSheet(),
+    );
+  }
 
-            // --- SECTION: COMMON HABITS ---
-            _buildSectionHeader(
-              title: 'Common Habits',
-              subtitle: 'Tap (+) to customize and activate your habits',
-              icon: Icons.track_changes_rounded,
-              accentColor: palette.accentPrimary,
-              headingColor: palette.textHeading,
-            ),
-            const SizedBox(height: 12),
+  void _openSettingsScreen(BuildContext context) {
+    HapticFeedback.lightImpact();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
+  }
 
-            // Compact habit cards mapped dynamically with '+' navigation to SettingHabitScreen
-            ...commonHabits.map((habit) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: _HoverPopCard(
-                    child: GlassContainer(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      borderRadius: 16,
-                      opacity: themeState.glassOpacity,
-                      accentGlowColor: palette.accentPrimary,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                habit['name']!,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: palette.textHeading,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                habit['quote']!,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: palette.textPrimary
-                                      .withValues(alpha: 0.7),
-                                ),
-                              ),
-                            ],
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ThemeCubit, ThemeState>(
+      builder: (context, themeState) {
+        final palette = themeState.currentPalette;
+
+        return BlocBuilder<HabitCubit, HabitState>(
+          builder: (context, habitState) {
+            final habits = habitState.habits;
+            final isExistingUser = habits.isNotEmpty;
+
+            final List<Map<String, String>> commonHabits = [
+              {'name': 'Walk / Exercise', 'quote': 'Stay active, stay sharp', 'type': 'Health'},
+              {'name': 'Coding / Focus Work', 'quote': 'Build consistency', 'type': 'Productivity'},
+              {'name': 'Documentation / Reading', 'quote': 'Knowledge compounds', 'type': 'Education'},
+            ];
+
+            return Stack(
+              children: [
+                ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                  children: [
+                    // --- TOP UTILITY ROW: THEME PALETTE + SETTINGS BUTTONS ---
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'TRACKIFY',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 2.0,
+                            color: palette.accentPrimary,
                           ),
-                          IconButton(
-                              constraints: const BoxConstraints(),
-                              padding: EdgeInsets.zero,
-                              icon: Icon(
-                                Icons.add_circle_outline_rounded,
-                                color: palette.accentPrimary,
-                                size: 26,
+                        ),
+                        Row(
+                          children: [
+                            // Theme Palette Button
+                            _HoverPopCard(
+                              child: GlassContainer(
+                                padding: const EdgeInsets.all(4),
+                                borderRadius: 14,
+                                opacity: themeState.glassOpacity,
+                                accentGlowColor: palette.accentPrimary,
+                                child: IconButton(
+                                  icon: Icon(Icons.palette_rounded, color: palette.accentPrimary, size: 20),
+                                  tooltip: 'Change Theme Palette',
+                                  onPressed: () => _openThemeBottomSheet(context),
+                                ),
                               ),
-                              tooltip: 'Configure Habit',
-                              onPressed: () async {
-                                final newHabit = await Navigator.push<HabitModel>(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ConfigureHabitScreen(
-                                      initialHabitName: habit['name']!,
-                                    ),
-                                  ),
-                                );
-                                if (newHabit != null && context.mounted) {
-                                  context.read<HabitCubit>().addHabit(newHabit);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Successfully created "${newHabit.name}"!'),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
-                                }
-                              },
+                            ),
+                            const SizedBox(width: 8),
+                            // Settings Button
+                            _HoverPopCard(
+                              child: GlassContainer(
+                                padding: const EdgeInsets.all(4),
+                                borderRadius: 14,
+                                opacity: themeState.glassOpacity,
+                                accentGlowColor: palette.accentPrimary,
+                                child: IconButton(
+                                  icon: Icon(Icons.settings_rounded, color: palette.textHeading, size: 20),
+                                  tooltip: 'Open Settings',
+                                  onPressed: () => _openSettingsScreen(context),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    // --- TOP ROW: WELCOME CARD WITH USER NAME ---
+                    _HoverPopCard(
+                      child: GlassContainer(
+                        padding: const EdgeInsets.all(20),
+                        borderRadius: 24,
+                        opacity: themeState.glassOpacity,
+                        accentGlowColor: palette.accentPrimary,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isExistingUser ? 'DAILY MOMENTUM' : 'GETTING STARTED',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                                color: palette.accentPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              isExistingUser ? 'Welcome Back, $_userName! 😊' : 'Welcome, $_userName! 👋',
+                              style: TextStyle(
+                                fontSize: 21,
+                                fontWeight: FontWeight.bold,
+                                color: palette.textHeading,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              isExistingUser
+                                  ? 'Track your habits below and maintain your consistency streak.'
+                                  : 'Start by choosing or creating your initial daily routines below.',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: palette.textPrimary.withValues(alpha: 0.8),
+                              ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                  )),
 
-              const SizedBox(height: 18),
+                    const SizedBox(height: 24),
 
-              // --- SECTION 1: HABIT CONSISTENCY HEATMAP (SOLID DARK CONTAINER) ---
-              _buildSectionHeader(
-                title: 'Habit Consistency Heatmap',
-                subtitle: 'Track your daily completion progress',
-                icon: Icons.grid_on_rounded,
-                accentColor: palette.accentPrimary,
-                headingColor: palette.textHeading,
-              ),
-              const SizedBox(height: 12),
-              _HoverPopCard(
-                child: _buildHabitHeatmapGrid(
-                  themeState: themeState,
-                  accentColor: palette.accentPrimary,
-                  textColor: palette.textPrimary,
-                  habits: habits,
+                    // ==========================================
+                    // DUAL STATE SECTION:
+                    // New User -> Common Habits (+)
+                    // Existing User -> Mark Progress [✓] / [O]
+                    // ==========================================
+                    if (!isExistingUser) ...[
+                      // --- NEW USER: COMMON HABITS ---
+                      _buildSectionHeader(
+                        title: 'Common Habits',
+                        subtitle: 'Tap (+) to customize and activate your habits',
+                        icon: Icons.track_changes_rounded,
+                        accentColor: palette.accentPrimary,
+                        headingColor: palette.textHeading,
+                      ),
+                      const SizedBox(height: 12),
+                      ...commonHabits.map((habit) => Padding(
+                            padding: const EdgeInsets.only(bottom: 10.0),
+                            child: _HoverPopCard(
+                              child: GlassContainer(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                borderRadius: 18,
+                                opacity: themeState.glassOpacity,
+                                accentGlowColor: palette.accentPrimary,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          habit['name']!,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: palette.textHeading,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          habit['quote']!,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: palette.textPrimary.withValues(alpha: 0.7),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    IconButton(
+                                      constraints: const BoxConstraints(),
+                                      padding: EdgeInsets.zero,
+                                      icon: Icon(
+                                        Icons.add_circle_outline_rounded,
+                                        color: palette.accentPrimary,
+                                        size: 28,
+                                      ),
+                                      tooltip: 'Configure Habit',
+                                      onPressed: () async {
+                                        final newHabit = await Navigator.push<HabitModel>(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => ConfigureHabitScreen(
+                                              initialHabitName: habit['name']!,
+                                            ),
+                                          ),
+                                        );
+                                        if (newHabit != null && context.mounted) {
+                                          context.read<HabitCubit>().addHabit(newHabit);
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('Successfully created "${newHabit.name}"!'),
+                                              backgroundColor: Colors.green,
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )),
+                    ] else ...[
+                      // --- EXISTING USER: MARK PROGRESS CHECKLIST ---
+                      _buildSectionHeader(
+                        title: 'Mark Progress',
+                        subtitle: 'Quickly check in your active daily routines',
+                        icon: Icons.checklist_rounded,
+                        accentColor: palette.accentPrimary,
+                        headingColor: palette.textHeading,
+                      ),
+                      const SizedBox(height: 12),
+                      ...habits.map((habit) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10.0),
+                          child: _HoverPopCard(
+                            child: GlassContainer(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              borderRadius: 18,
+                              opacity: themeState.glassOpacity,
+                              accentGlowColor: habit.isCompletedToday
+                                  ? palette.accentPrimary
+                                  : Colors.transparent,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color: palette.accentPrimary.withValues(alpha: 0.15),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Icon(
+                                            _getHabitIcon(habit.category),
+                                            color: palette.accentPrimary,
+                                            size: 20,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 14),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                habit.name,
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold,
+                                                  decoration: habit.isCompletedToday
+                                                      ? TextDecoration.lineThrough
+                                                      : TextDecoration.none,
+                                                  decorationColor: palette.accentPrimary,
+                                                  color: habit.isCompletedToday
+                                                      ? palette.textHeading.withValues(alpha: 0.6)
+                                                      : palette.textHeading,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.local_fire_department_rounded,
+                                                    color: const Color(0xFFFF2A85),
+                                                    size: 14,
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    '${habit.streakCount} day streak',
+                                                    style: TextStyle(
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: palette.textPrimary,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      _checkAllCompletedCelebration(habits, habit.id);
+                                      context.read<HabitCubit>().toggleHabitCompletion(habit.id);
+                                    },
+                                    behavior: HitTestBehavior.opaque,
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 200),
+                                      width: 36,
+                                      height: 36,
+                                      decoration: BoxDecoration(
+                                        color: habit.isCompletedToday
+                                            ? palette.accentPrimary
+                                            : Colors.white.withValues(alpha: 0.05),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: habit.isCompletedToday
+                                              ? palette.accentPrimary
+                                              : Colors.white.withValues(alpha: 0.25),
+                                          width: 2.0,
+                                        ),
+                                      ),
+                                      child: habit.isCompletedToday
+                                          ? const Icon(
+                                              Icons.check_rounded,
+                                              size: 22,
+                                              color: Colors.black,
+                                            )
+                                          : null,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
+
+                    const SizedBox(height: 24),
+
+                    // ==========================================
+                    // SECTION: GITHUB CONTRIBUTION GRAPH (HABIT + SUBSCRIPTION)
+                    // ==========================================
+                    _buildSectionHeader(
+                      title: 'GitHub Graph (Habit + Subscription)',
+                      subtitle: 'Multi-week completion & renewal activity matrix',
+                      icon: Icons.grid_on_rounded,
+                      accentColor: palette.accentPrimary,
+                      headingColor: palette.textHeading,
+                    ),
+                    const SizedBox(height: 12),
+                    _HoverPopCard(
+                      child: _buildGithubContributionMatrix(
+                        themeState: themeState,
+                        accentColor: palette.accentPrimary,
+                        secondaryColor: palette.accentSecondary,
+                        textColor: palette.textPrimary,
+                        habits: habits,
+                        subscriptions: _subscriptions,
+                      ),
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    // ==========================================
+                    // SECTION: GITHUB PERFORMANCE CHARTS (SHOWING PERFORMANCE)
+                    // ==========================================
+                    _buildSectionHeader(
+                      title: 'Performance & Consistency Charts',
+                      subtitle: 'Momentum metrics & routine completion rates',
+                      icon: Icons.insights_rounded,
+                      accentColor: palette.accentSecondary,
+                      headingColor: palette.textHeading,
+                    ),
+                    const SizedBox(height: 12),
+                    _HoverPopCard(
+                      child: _buildPerformanceChartCard(
+                        themeState: themeState,
+                        accentColor: palette.accentPrimary,
+                        secondaryColor: palette.accentSecondary,
+                        textColor: palette.textPrimary,
+                        headingColor: palette.textHeading,
+                        habits: habits,
+                      ),
+                    ),
+
+                    const SizedBox(height: 100),
+                  ],
                 ),
-              ),
 
-              const SizedBox(height: 28),
-
-              // --- SECTION 2: SUBSCRIPTION & BILLING CYCLE MATRIX (SOLID DARK CONTAINER) ---
-              _buildSectionHeader(
-                title: 'Subscription Renewals',
-                subtitle: 'Active monthly billing schedule',
-                icon: Icons.calendar_view_month_rounded,
-                accentColor: palette.accentSecondary,
-                headingColor: palette.textHeading,
-              ),
-              const SizedBox(height: 12),
-              _HoverPopCard(
-                child: _buildSubscriptionHeatmapGrid(
-                  themeState: themeState,
-                  accentColor: palette.accentSecondary,
-                  textColor: palette.textPrimary,
+                // Full-Screen Confetti Overlay
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: ConfettiWidget(
+                    confettiController: _confettiController,
+                    blastDirectionality: BlastDirectionality.explosive,
+                    shouldLoop: false,
+                    numberOfParticles: 40,
+                    maxBlastForce: 30,
+                    minBlastForce: 10,
+                    emissionFrequency: 0.05,
+                    gravity: 0.15,
+                    colors: [
+                      palette.accentPrimary,
+                      palette.accentSecondary,
+                      Colors.amber,
+                      Colors.white,
+                      const Color(0xFFFF2A85),
+                    ],
+                  ),
                 ),
-              ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
-              const SizedBox(height: 100),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
+  IconData _getHabitIcon(String category) {
+    switch (category.toLowerCase()) {
+      case 'productivity':
+        return Icons.code_rounded;
+      case 'education':
+        return Icons.menu_book_rounded;
+      case 'health':
+        return Icons.fitness_center_rounded;
+      case 'fitness':
+        return Icons.directions_run_rounded;
+      case 'mindfulness':
+        return Icons.self_improvement_rounded;
+      default:
+        return Icons.star_rounded;
+    }
+  }
 
-  /// Helper method to construct unified section headers
   Widget _buildSectionHeader({
     required String title,
     required String subtitle,
@@ -278,20 +637,26 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  /// Builds the habit consistency heatmap grid on a solid dark background for new users
-  Widget _buildHabitHeatmapGrid({
+  /// Builds the GitHub-style contribution matrix showing habits + subscription renewal markers
+  Widget _buildGithubContributionMatrix({
     required ThemeState themeState,
     required Color accentColor,
+    required Color secondaryColor,
     required Color textColor,
     required List<HabitModel> habits,
+    required List<SubscriptionModel> subscriptions,
   }) {
     const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    // Map subscription renewals to days (1..28)
+    final Set<int> renewalDays = subscriptions
+        .map((s) => s.nextBillingDate.day)
+        .toSet();
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:
-            Colors.black.withValues(alpha: 0.45), // Solid dark base container
+        color: Colors.black.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: accentColor.withValues(alpha: 0.25),
@@ -299,98 +664,238 @@ class DashboardScreen extends StatelessWidget {
         ),
       ),
       child: Column(
-        children: List.generate(daysOfWeek.length, (rowIndex) {
-          // Calculate intensity from active habits
-          int completedHabitsForDay = 0;
-          for (var habit in habits) {
-            if (rowIndex < habit.weeklyProgress.length && habit.weeklyProgress[rowIndex]) {
-              completedHabitsForDay++;
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Weekly Matrix',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: textColor.withValues(alpha: 0.8),
+                ),
+              ),
+              Row(
+                children: [
+                  _buildLegendIndicator('Habit Complete', accentColor),
+                  const SizedBox(width: 10),
+                  _buildLegendIndicator('Renewal', secondaryColor),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ...List.generate(daysOfWeek.length, (rowIndex) {
+            int completedForDay = 0;
+            for (var h in habits) {
+              if (rowIndex < h.weeklyProgress.length && h.weeklyProgress[rowIndex]) {
+                completedForDay++;
+              }
             }
-          }
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 32,
-                  child: Text(
-                    daysOfWeek[rowIndex],
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: textColor.withValues(alpha: 0.7),
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3.5),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 32,
+                    child: Text(
+                      daysOfWeek[rowIndex],
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: textColor.withValues(alpha: 0.7),
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: List.generate(5, (colIndex) {
-                      // Column 4 is the current week's active day calculation
-                      final intensity = colIndex == 4 ? completedHabitsForDay : (completedHabitsForDay > 0 && colIndex % 2 == 0 ? 1 : 0);
-                      return _HoverHeatmapCell(
-                        intensity: intensity,
-                        accentColor: accentColor,
-                        textColor: textColor,
-                      );
-                    }),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(6, (colIndex) {
+                        final isCurrentWeek = colIndex == 5;
+                        final intensity = isCurrentWeek
+                            ? completedForDay
+                            : (completedForDay > 0 && (colIndex + rowIndex) % 2 == 0 ? 1 : 0);
+
+                        final cellDay = (rowIndex * 4 + colIndex + 1);
+                        final hasRenewal = renewalDays.contains(cellDay);
+
+                        return _HoverGithubCell(
+                          intensity: intensity,
+                          hasRenewal: hasRenewal,
+                          accentColor: accentColor,
+                          secondaryColor: secondaryColor,
+                          textColor: textColor,
+                        );
+                      }),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          );
-        }),
+                ],
+              ),
+            );
+          }),
+        ],
       ),
     );
   }
 
-  /// Builds the monthly subscription calendar grid on a solid dark background
-  Widget _buildSubscriptionHeatmapGrid({
+  Widget _buildLegendIndicator(String label, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 10, color: Colors.white60),
+        ),
+      ],
+    );
+  }
+
+  /// Builds the Performance Analytics & Consistency Score Card
+  Widget _buildPerformanceChartCard({
     required ThemeState themeState,
     required Color accentColor,
+    required Color secondaryColor,
     required Color textColor,
+    required Color headingColor,
+    required List<HabitModel> habits,
   }) {
-    // Empty map initially for a new user setting up subscriptions
-    const Map<int, String> activeRenewalDays = {};
+    final totalHabits = habits.length;
+    final completedCount = habits.where((h) => h.isCompletedToday).length;
+    final completionRate = totalHabits > 0 ? (completedCount / totalHabits) : 0.0;
+    final maxStreak = habits.isNotEmpty
+        ? habits.map((h) => h.streakCount).reduce((a, b) => a > b ? a : b)
+        : 0;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color:
-            Colors.black.withValues(alpha: 0.45), // Solid dark base container
+        color: Colors.black.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: accentColor.withValues(alpha: 0.25),
+          color: secondaryColor.withValues(alpha: 0.25),
           width: AppGlassStyle.borderWidth,
         ),
       ),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 7,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-        ),
-        itemCount: 28,
-        itemBuilder: (context, index) {
-          final day = index + 1;
-          final isRenewal = activeRenewalDays.containsKey(day);
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'DAILY COMPLETION RATE',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.1,
+                      color: secondaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${(completionRate * 100).round()}% Completed',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: headingColor,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: secondaryColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: secondaryColor.withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.local_fire_department_rounded, color: const Color(0xFFFF2A85), size: 18),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$maxStreak Days Best',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: headingColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
 
-          return _HoverSubscriptionCell(
-            day: day,
-            isRenewal: isRenewal,
-            accentColor: accentColor,
-            textColor: textColor,
-          );
-        },
+          // Visual Progress Bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: completionRate,
+              minHeight: 10,
+              backgroundColor: Colors.white.withValues(alpha: 0.08),
+              valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          // Micro performance column indicators
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildStatColumn('Total Routines', '$totalHabits', textColor, headingColor),
+              Container(width: 1, height: 28, color: Colors.white12),
+              _buildStatColumn('Completed Today', '$completedCount', accentColor, headingColor),
+              Container(width: 1, height: 28, color: Colors.white12),
+              _buildStatColumn('Pending', '${totalHabits - completedCount}', textColor, headingColor),
+            ],
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildStatColumn(String label, String value, Color valueColor, Color headingColor) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+            color: valueColor,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: headingColor.withValues(alpha: 0.65),
+          ),
+        ),
+      ],
     );
   }
 }
 
-/// Reusable interactive wrapper card that applies smooth scale pop effect on hover
 class _HoverPopCard extends StatefulWidget {
   final Widget child;
   const _HoverPopCard({required this.child});
@@ -417,23 +922,26 @@ class _HoverPopCardState extends State<_HoverPopCard> {
   }
 }
 
-/// Individual heatmap cell inside the habit consistency grid (empty boxes for new user)
-class _HoverHeatmapCell extends StatefulWidget {
+class _HoverGithubCell extends StatefulWidget {
   final int intensity;
+  final bool hasRenewal;
   final Color accentColor;
+  final Color secondaryColor;
   final Color textColor;
 
-  const _HoverHeatmapCell({
+  const _HoverGithubCell({
     required this.intensity,
+    required this.hasRenewal,
     required this.accentColor,
+    required this.secondaryColor,
     required this.textColor,
   });
 
   @override
-  State<_HoverHeatmapCell> createState() => _HoverHeatmapCellState();
+  State<_HoverGithubCell> createState() => _HoverGithubCellState();
 }
 
-class _HoverHeatmapCellState extends State<_HoverHeatmapCell> {
+class _HoverGithubCellState extends State<_HoverGithubCell> {
   bool _isHovered = false;
 
   @override
@@ -444,93 +952,44 @@ class _HoverHeatmapCellState extends State<_HoverHeatmapCell> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedScale(
-        scale: _isHovered ? 1.3 : 1.0,
+        scale: _isHovered ? 1.35 : 1.0,
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeOutCubic,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          width: 24,
-          height: 24,
+          width: 26,
+          height: 26,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(6),
-            color: !isFilled
-                ? Colors.white
-                    .withValues(alpha: 0.04) // Clear, dark empty box appearance
-                : widget.accentColor.withValues(alpha: 0.2 * widget.intensity),
+            color: isFilled
+                ? widget.accentColor.withValues(alpha: 0.25 * widget.intensity.clamp(1, 4))
+                : (widget.hasRenewal
+                    ? widget.secondaryColor.withValues(alpha: 0.3)
+                    : Colors.white.withValues(alpha: 0.04)),
             border: Border.all(
               color: _isHovered
                   ? widget.accentColor
-                  : Colors.white.withValues(alpha: 0.1),
-              width: AppGlassStyle.borderWidth,
+                  : (widget.hasRenewal
+                      ? widget.secondaryColor.withValues(alpha: 0.6)
+                      : Colors.white.withValues(alpha: 0.1)),
+              width: widget.hasRenewal ? 1.5 : AppGlassStyle.borderWidth,
             ),
           ),
+          child: widget.hasRenewal
+              ? Center(
+                  child: Container(
+                    width: 5,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: widget.secondaryColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                )
+              : null,
         ),
       ),
     );
   }
 }
 
-/// Individual calendar grid cell representing a day for a new user
-class _HoverSubscriptionCell extends StatefulWidget {
-  final int day;
-  final bool isRenewal;
-  final Color accentColor;
-  final Color textColor;
-
-  const _HoverSubscriptionCell({
-    required this.day,
-    required this.isRenewal,
-    required this.accentColor,
-    required this.textColor,
-  });
-
-  @override
-  State<_HoverSubscriptionCell> createState() => _HoverSubscriptionCellState();
-}
-
-class _HoverSubscriptionCellState extends State<_HoverSubscriptionCell> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedScale(
-        scale: _isHovered ? 1.15 : 1.0,
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeOutCubic,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: widget.isRenewal
-                ? widget.accentColor.withValues(alpha: 0.25)
-                : Colors.white.withValues(alpha: 0.03), // Clear, dark empty box
-            border: Border.all(
-              color: _isHovered
-                  ? widget.accentColor
-                  : Colors.white.withValues(alpha: 0.08),
-              width: AppGlassStyle.borderWidth,
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '${widget.day}',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: _isHovered ? FontWeight.bold : FontWeight.normal,
-                  color: _isHovered
-                      ? widget.accentColor
-                      : widget.textColor.withValues(alpha: 0.6),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

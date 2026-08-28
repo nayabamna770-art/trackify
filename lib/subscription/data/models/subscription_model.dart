@@ -106,4 +106,41 @@ class SubscriptionModel extends Equatable {
         linkedHabitName,
         isUnderutilized,
       ];
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'cost': cost,
+      'billingCycle': billingCycle.name,
+      'nextBillingDate': nextBillingDate.toIso8601String(),
+      'currency': currency.name,
+      'isFreeTrial': isFreeTrial,
+      'linkedHabitId': linkedHabitId,
+      'linkedHabitName': linkedHabitName,
+      'isUnderutilized': isUnderutilized,
+    };
+  }
+
+  factory SubscriptionModel.fromJson(Map<String, dynamic> json) {
+    return SubscriptionModel(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      cost: (json['cost'] as num?)?.toDouble() ?? 0.0,
+      billingCycle: json['billingCycle'] == 'yearly'
+          ? BillingCycle.yearly
+          : BillingCycle.monthly,
+      nextBillingDate: json['nextBillingDate'] != null
+          ? DateTime.tryParse(json['nextBillingDate'] as String) ?? DateTime.now()
+          : DateTime.now(),
+      currency: CurrencyType.values.firstWhere(
+        (c) => c.name == json['currency'],
+        orElse: () => CurrencyType.usd,
+      ),
+      isFreeTrial: json['isFreeTrial'] as bool? ?? false,
+      linkedHabitId: json['linkedHabitId'] as String?,
+      linkedHabitName: json['linkedHabitName'] as String?,
+      isUnderutilized: json['isUnderutilized'] as bool? ?? false,
+    );
+  }
 }

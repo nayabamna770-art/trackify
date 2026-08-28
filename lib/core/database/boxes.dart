@@ -10,8 +10,7 @@ class Boxes {
   static Box get habitsBox => Hive.box(habitsBoxName);
   static Box get habits => habitsBox;
 
-  static Box<SubscriptionModel> get subscriptionsBox =>
-      Hive.box<SubscriptionModel>(subscriptionsBoxName);
+  static Box get subscriptionsBox => Hive.box(subscriptionsBoxName);
 
   // Strongly-typed getter matching ThemeRepository
   static Box<ThemeStateDto> get themeBox => Hive.box<ThemeStateDto>(themeBoxName);
@@ -21,7 +20,7 @@ class Boxes {
       await Hive.openBox(habitsBoxName);
     }
     if (!Hive.isBoxOpen(subscriptionsBoxName)) {
-      await Hive.openBox<SubscriptionModel>(subscriptionsBoxName);
+      await Hive.openBox(subscriptionsBoxName);
     }
     if (!Hive.isBoxOpen(themeBoxName)) {
       await Hive.openBox<ThemeStateDto>(themeBoxName);

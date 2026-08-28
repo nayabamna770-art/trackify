@@ -9,6 +9,8 @@ import 'package:trackify/core/theme/theme_state.dart';
 import 'package:trackify/features/onboarding/presentation/pages/splash_screen.dart';
 import 'package:trackify/habit/bloc/habit_cubit.dart';
 import 'package:trackify/habit/data/habit_repository.dart';
+import 'package:trackify/subscription/data/subscription_repository.dart';
+import 'package:trackify/subscription/logic/subscription_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +43,11 @@ class TrackifyApp extends StatelessWidget {
           create: (context) => HabitCubit(
             repository: HabitRepository(),
           )..loadHabits(),
+        ),
+        BlocProvider(
+          create: (context) => SubscriptionCubit(
+            repository: SubscriptionRepository(),
+          )..loadSubscriptions(),
         ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(

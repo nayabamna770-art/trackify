@@ -1,7 +1,10 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trackify/core/theme/logic/theme_cubit.dart';
 import 'package:trackify/core/theme/theme_state.dart';
+import 'package:trackify/core/widgets/spring_scale_button.dart';
 import 'package:trackify/features/dashboard/presentation/pages/dashboard_screen.dart';
 import 'package:trackify/habit/presentation/pages/habit_screen.dart';
 import 'package:trackify/subscription/presentation/pages/subscription_screen.dart';
@@ -30,34 +33,126 @@ class _MainScreenShellState extends State<MainScreenShell> {
         final palette = themeState.currentPalette;
 
         return Scaffold(
-          body: IndexedStack(
-            index: _currentIndex,
-            children: _screens,
-          ),
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: _currentIndex,
-            onTap: (index) => setState(() => _currentIndex = index),
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: const Color(0xFF0B0F17),
-            selectedItemColor: palette.accentPrimary,
-            unselectedItemColor: Colors.white54,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.dashboard_rounded),
-                label: 'Dashboard',
+          extendBody: true,
+          backgroundColor: palette.background,
+          body: Stack(
+            children: [
+              // 1. Persistent Tab Screen Views
+              IndexedStack(
+                index: _currentIndex,
+                children: _screens,
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.track_changes_rounded),
-                label: 'Habits',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.subscriptions_rounded),
-                label: 'Subscriptions',
+
+              // 2. Floating Glass Capsule Navigation Bar
+              Positioned(
+                left: 20,
+                right: 20,
+                bottom: 24,
+                child: _buildFloatingGlassNavBar(palette, themeState.glassOpacity),
               ),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildFloatingGlassNavBar(ThemePalette palette, double glassOpacity) {
+    final navItems = [
+      {'icon': Icons.grid_view_rounded, 'label': 'Dashboard'},
+      {'icon': Icons.swap_horiz_rounded, 'label': 'Habits'},
+      {'icon': Icons.bookmark_outline_rounded, 'label': 'Subscriptions'},
+    ];
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(32),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.82),
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.15),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.45),
+                blurRadius: 24,
+                spreadRadius: 2,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: palette.accentPrimary.withValues(alpha: 0.08),
+                blurRadius: 16,
+                spreadRadius: -2,
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(navItems.length, (index) {
+              final item = navItems[index];
+              final isSelected = _currentIndex == index;
+              final iconData = item['icon'] as IconData;
+              final label = item['label'] as String;
+
+              return SpringScaleButton(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  setState(() => _currentIndex = index);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOutCubic,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSelected ? 18 : 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? palette.accentPrimary.withValues(alpha: 0.18)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(24),
+                    border: isSelected
+                        ? Border.all(
+                            color: palette.accentPrimary.withValues(alpha: 0.5),
+                            width: 1.2,
+                          )
+                        : null,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        iconData,
+                        color: isSelected
+                            ? palette.accentPrimary
+                            : Colors.white.withValues(alpha: 0.5),
+                        size: 22,
+                      ),
+                      if (isSelected) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          label,
+                          style: TextStyle(
+                            color: palette.accentPrimary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+      ),
     );
   }
 }

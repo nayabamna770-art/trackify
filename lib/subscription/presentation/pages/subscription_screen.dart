@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:trackify/core/theme/logic/theme_cubit.dart';
 import 'package:trackify/core/theme/theme_state.dart';
+import 'package:trackify/core/widgets/glass_container.dart';
 import 'package:trackify/core/widgets/spring_scale_button.dart';
+import 'package:trackify/core/widgets/theme_selection_bottom_sheet.dart';
 import 'package:trackify/habit/bloc/habit_cubit.dart';
+import 'package:trackify/settings/presentation/pages/setting_screen.dart';
 import 'package:trackify/subscription/data/models/subscription_model.dart';
 import 'package:trackify/subscription/logic/subscription_cubit.dart';
 import 'package:trackify/subscription/logic/subscription_state.dart';
@@ -24,6 +28,24 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     context.read<SubscriptionCubit>().loadSubscriptions();
   }
 
+  void _openThemeBottomSheet(BuildContext context) {
+    HapticFeedback.lightImpact();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => const ThemeSelectionBottomSheet(),
+    );
+  }
+
+  void _openSettingsScreen(BuildContext context) {
+    HapticFeedback.lightImpact();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<HabitCubit, HabitState>(
@@ -41,16 +63,25 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                 backgroundColor: Colors.transparent,
                 body: SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 12),
-                        _buildHeader(
+                        // 1. Top Header: Welcome Back + Trackify + Theme/Settings Buttons
+                        _buildTopHeader(context, primaryAccent, glassOpacity),
+                        const SizedBox(height: 20),
+
+                        // 2. Subscriptions Title + Total + Urgent Badge + (+) Add Button
+                        _buildSubscriptionsHeader(
                             context, state, primaryAccent, glassOpacity),
                         const SizedBox(height: 16),
+
+                        // 3. Filter Category Pills (All, Active, Urgent, Habit Linked)
                         _buildFilterPills(context, state, primaryAccent),
                         const SizedBox(height: 16),
+
+                        // 4. Subscriptions List / Empty State
                         Expanded(
                           child: state.status == SubscriptionStatus.loading
                               ? Center(
@@ -59,7 +90,12 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                   ),
                                 )
                               : state.filteredSubscriptions.isEmpty
-                                  ? _buildEmptyState()
+                                  ? _buildEmptyState(
+                                      context,
+                                      state,
+                                      primaryAccent,
+                                      glassOpacity,
+                                    )
                                   : ListView.builder(
                                       itemCount:
                                           state.filteredSubscriptions.length,
@@ -102,82 +138,80 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     );
   }
 
-  Widget _buildHeader(
+  // --- Top App Header matching Dashboard and Mockup ---
+  Widget _buildTopHeader(
     BuildContext context,
-    SubscriptionState state,
     Color primaryAccent,
     double glassOpacity,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
               children: [
-                const Text(
-                  'Subscriptions',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 2),
                 Text(
-                  'Est. Monthly Total: \$${state.totalMonthlyExpense.toStringAsFixed(2)}',
+                  'Welcome Back',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 13,
+                    fontWeight: FontWeight.w500,
                   ),
+                ),
+                const SizedBox(width: 4),
+                const Text(
+                  '👋',
+                  style: TextStyle(fontSize: 13),
                 ),
               ],
             ),
-            Row(
-              children: [
-                if (state.attentionCount > 0) ...[
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                          color: Colors.amber.withValues(alpha: 0.5)),
-                    ),
-                    child: Text(
-                      '${state.attentionCount} Urgent',
-                      style: const TextStyle(
-                        color: Colors.amber,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-                SpringScaleButton(
-                  onTap: () => _openAddSubscriptionSheet(
-                      context, primaryAccent, glassOpacity),
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: primaryAccent.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: primaryAccent.withValues(alpha: 0.4),
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.add,
-                      color: primaryAccent,
-                      size: 20,
-                    ),
-                  ),
+            const SizedBox(height: 2),
+            const Text(
+              'Trackify',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            // Theme Palette Button
+            SpringScaleButton(
+              onTap: () => _openThemeBottomSheet(context),
+              child: GlassContainer(
+                padding: const EdgeInsets.all(8),
+                borderRadius: 14,
+                opacity: glassOpacity,
+                accentGlowColor: primaryAccent,
+                child: Icon(
+                  Icons.palette_outlined,
+                  color: primaryAccent,
+                  size: 20,
                 ),
-              ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            // Settings Button
+            SpringScaleButton(
+              onTap: () => _openSettingsScreen(context),
+              child: GlassContainer(
+                padding: const EdgeInsets.all(8),
+                borderRadius: 14,
+                opacity: glassOpacity,
+                accentGlowColor: primaryAccent,
+                child: Icon(
+                  Icons.settings_outlined,
+                  color: primaryAccent,
+                  size: 20,
+                ),
+              ),
             ),
           ],
         ),
@@ -185,6 +219,100 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     );
   }
 
+  // --- Subscriptions Header with Total, Urgent badge, Add (+) button ---
+  Widget _buildSubscriptionsHeader(
+    BuildContext context,
+    SubscriptionState state,
+    Color primaryAccent,
+    double glassOpacity,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Subscriptions',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.3,
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              'Est. Monthly Total: \$${state.totalMonthlyExpense.toStringAsFixed(2)}',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.65),
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            if (state.attentionCount > 0) ...[
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.amber.withValues(alpha: 0.7),
+                    width: 1.2,
+                  ),
+                ),
+                child: Text(
+                  '${state.attentionCount} Urgent',
+                  style: const TextStyle(
+                    color: Colors.amber,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+            ],
+            // (+) Add Subscription Button
+            SpringScaleButton(
+              onTap: () => _openAddSubscriptionSheet(
+                  context, primaryAccent, glassOpacity),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: primaryAccent.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: primaryAccent.withValues(alpha: 0.45),
+                    width: 1.3,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryAccent.withValues(alpha: 0.2),
+                      blurRadius: 10,
+                      spreadRadius: -2,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.add,
+                  color: primaryAccent,
+                  size: 22,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // --- Filter Category Pills ---
   Widget _buildFilterPills(
     BuildContext context,
     SubscriptionState state,
@@ -199,24 +327,68 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
       child: Row(
         children: filters.map((f) {
           final filterVal = f['value'] as SubscriptionFilter;
           final isSelected = state.currentFilter == filterVal;
+          final label = f['label'] as String;
+
           return Padding(
             padding: const EdgeInsets.only(right: 8.0),
-            child: ChoiceChip(
-              label: Text(f['label'] as String),
-              selected: isSelected,
-              selectedColor: primaryAccent,
-              backgroundColor: Colors.white.withValues(alpha: 0.08),
-              labelStyle: TextStyle(
-                color: isSelected ? Colors.black : Colors.white70,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-              onSelected: (_) {
+            child: SpringScaleButton(
+              onTap: () {
+                HapticFeedback.selectionClick();
                 context.read<SubscriptionCubit>().setFilter(filterVal);
               },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? primaryAccent
+                      : const Color(0xFF1E293B).withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected
+                        ? primaryAccent
+                        : Colors.white.withValues(alpha: 0.1),
+                    width: 1.2,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: primaryAccent.withValues(alpha: 0.35),
+                            blurRadius: 12,
+                            offset: const Offset(0, 3),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isSelected) ...[
+                      const Icon(
+                        Icons.check,
+                        size: 14,
+                        color: Colors.black,
+                      ),
+                      const SizedBox(width: 5),
+                    ],
+                    Text(
+                      label,
+                      style: TextStyle(
+                        color: isSelected ? Colors.black : Colors.white70,
+                        fontSize: 13,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           );
         }).toList(),
@@ -224,11 +396,106 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  // --- Empty State for New User or Filter Result ---
+  Widget _buildEmptyState(
+    BuildContext context,
+    SubscriptionState state,
+    Color primaryAccent,
+    double glassOpacity,
+  ) {
+    final isNewUser = state.subscriptions.isEmpty;
+
     return Center(
-      child: Text(
-        'No subscriptions found in this view.',
-        style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: GlassContainer(
+          borderRadius: 24,
+          opacity: glassOpacity + 0.05,
+          padding: const EdgeInsets.all(28),
+          accentGlowColor: primaryAccent,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: primaryAccent.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: primaryAccent.withValues(alpha: 0.4),
+                    width: 1.5,
+                  ),
+                ),
+                child: Icon(
+                  isNewUser
+                      ? Icons.subscriptions_outlined
+                      : Icons.filter_list_off_rounded,
+                  size: 40,
+                  color: primaryAccent,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                isNewUser
+                    ? 'No Subscriptions Tracked Yet'
+                    : 'No Subscriptions In This View',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                isNewUser
+                    ? 'Add your subscriptions (e.g. Netflix, Spotify, GitHub) to keep tabs on monthly spending and habit ROI.'
+                    : 'Try switching filters or add a new subscription.',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.65),
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              SpringScaleButton(
+                onTap: () => _openAddSubscriptionSheet(
+                    context, primaryAccent, glassOpacity),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: primaryAccent,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryAccent.withValues(alpha: 0.35),
+                        blurRadius: 14,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.add, color: Colors.black, size: 18),
+                      SizedBox(width: 6),
+                      Text(
+                        'Add Subscription',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -292,8 +559,8 @@ class _Interactive3DSubscriptionCardState
     final double dy = localPosition.dy - (size.height / 2);
 
     setState(() {
-      _rotateX = (dy / (size.height / 2)) * -0.08;
-      _rotateY = (dx / (size.width / 2)) * 0.08;
+      _rotateX = (dy / (size.height / 2)) * -0.06;
+      _rotateY = (dx / (size.width / 2)) * 0.06;
     });
   }
 
@@ -324,27 +591,12 @@ class _Interactive3DSubscriptionCardState
                 ..rotateX(_rotateX)
                 ..rotateY(_rotateY),
               alignment: FractionalOffset.center,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: widget.primaryAccent.withValues(
-                        alpha: (_rotateX != 0 || _rotateY != 0) ? 0.25 : 0.05,
-                      ),
-                      blurRadius: 20,
-                      spreadRadius: -2,
-                      offset: Offset(_rotateY * 30, _rotateX * -30),
-                    ),
-                  ],
-                ),
-                child: SubscriptionCard(
-                  subscription: widget.subscription,
-                  primaryAccent: widget.primaryAccent,
-                  glassOpacity: widget.glassOpacity,
-                  onRenew: widget.onRenew,
-                  onDelete: widget.onDelete,
-                ),
+              child: SubscriptionCard(
+                subscription: widget.subscription,
+                primaryAccent: widget.primaryAccent,
+                glassOpacity: widget.glassOpacity,
+                onRenew: widget.onRenew,
+                onDelete: widget.onDelete,
               ),
             ),
           ),

@@ -14,7 +14,7 @@ import 'package:trackify/habit/domains/models/habit_model.dart';
 import 'package:trackify/habit/presentation/pages/configure_habit_screen.dart';
 import 'package:trackify/settings/presentation/pages/setting_screen.dart';
 import 'package:trackify/subscription/data/models/subscription_model.dart';
-import 'package:trackify/subscription/data/repositories/subscription_repository.dart';
+import 'package:trackify/subscription/data/subscription_repository.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -443,9 +443,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               const SizedBox(height: 2),
                                               Row(
                                                 children: [
-                                                  Icon(
+                                                  const Icon(
                                                     Icons.local_fire_department_rounded,
-                                                    color: const Color(0xFFFF2A85),
+                                                    color: Color(0xFFFF2A85),
                                                     size: 14,
                                                   ),
                                                   const SizedBox(width: 4),
@@ -827,7 +827,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.local_fire_department_rounded, color: const Color(0xFFFF2A85), size: 18),
+                    const Icon(Icons.local_fire_department_rounded, color: Color(0xFFFF2A85), size: 18),
                     const SizedBox(width: 4),
                     Text(
                       '$maxStreak Days Best',

@@ -1,6 +1,5 @@
 import 'package:hive/hive.dart';
-import 'package:trackify/subscription/data/models/subscription_model.dart';
-import 'package:trackify/core/theme/data/theme_adapter.g.dart'; // <--- Import your DTO model
+import 'package:trackify/core/theme/data/theme_adapter.g.dart';
 
 class Boxes {
   static const String habitsBoxName = 'habits_box';

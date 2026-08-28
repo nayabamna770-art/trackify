@@ -134,9 +134,9 @@ class HabitCard extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.local_fire_department_rounded,
-                            color: const Color(0xFFFF2A85),
+                            color: Color(0xFFFF2A85),
                             size: 18,
                           ),
                           const SizedBox(width: 6),

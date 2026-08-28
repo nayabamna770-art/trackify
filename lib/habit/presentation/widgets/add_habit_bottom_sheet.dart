@@ -184,7 +184,7 @@ class _AddHabitBottomSheetState extends State<AddHabitBottomSheet>
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       dropdownColor: Colors.grey[900],
-                      value: _selectedSubscription,
+                      initialValue: _selectedSubscription,
                       hint: Text(
                         'Select Subscription',
                         style: TextStyle(color: palette.textPrimary),

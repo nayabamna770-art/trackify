@@ -164,7 +164,7 @@ class _AddSubscriptionDialogState extends State<AddSubscriptionDialog> {
 
               // Billing Cycle Selection
               DropdownButtonFormField<BillingCycle>(
-                value: _selectedBillingCycle,
+                initialValue: _selectedBillingCycle,
                 decoration: const InputDecoration(
                   labelText: 'Billing Cycle',
                 ),
@@ -184,7 +184,7 @@ class _AddSubscriptionDialogState extends State<AddSubscriptionDialog> {
 
               // Optional Habit Selector
               DropdownButtonFormField<HabitModel?>(
-                value: _selectedHabit,
+                initialValue: _selectedHabit,
                 decoration: const InputDecoration(
                   labelText: 'Link to Habit (Optional)',
                 ),

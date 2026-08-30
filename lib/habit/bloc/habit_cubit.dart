@@ -4,8 +4,11 @@ import 'package:trackify/core/services/home_widget_service.dart';
 import 'package:trackify/habit/data/habit_repository.dart';
 import 'package:trackify/habit/domains/models/habit_model.dart';
 
-/// Immutable state container for the Habit feature utilizing Equatable
-/// to prevent unnecessary UI rebuilds.
+/// ============================================================================
+/// HABIT STATE
+/// ============================================================================
+/// Immutable state container holding the list of user habits.
+/// Utilizes Equatable to prevent redundant UI rebuilds on identical state emissions.
 class HabitState extends Equatable {
   final List<HabitModel> habits;
 
@@ -21,24 +24,29 @@ class HabitState extends Equatable {
   List<Object?> get props => [habits];
 }
 
-/// Cubit managing Habit state business rules and coordinating with [HabitRepository].
+/// ============================================================================
+/// HABIT CUBIT (BUSINESS LOGIC LAYER)
+/// ============================================================================
+/// Manages reactive habit state, streak compounding logic, daily check-ins,
+/// and bidirectional synchronization with Android Home Screen Widgets.
 class HabitCubit extends Cubit<HabitState> {
   final HabitRepository repository;
 
   HabitCubit({required this.repository})
       : super(HabitState(habits: repository.getHabits())) {
+    // Initial broadcast to sync home screen widgets on app startup
     HomeWidgetService.updateHabitWidget(state.habits);
   }
 
-  /// Reloads habits directly from local storage sync bounds.
+  /// Reloads habits directly from local Hive storage and updates widgets.
   void loadHabits() {
     final habits = repository.getHabits();
     emit(state.copyWith(habits: habits));
     HomeWidgetService.updateHabitWidget(habits);
   }
 
-  /// Toggles completion status for today, updates weekly matrix, adjusts streaks, 
-  /// and persists changes to the local storage adapter.
+  /// Toggles today's completion status for a habit, updates streak counter,
+  /// flips weekly progress matrix, saves to Hive, and refreshes the home widget.
   void toggleHabitCompletion(String id) {
     final updatedHabits = state.habits.map((habit) {
       if (habit.id == id) {
@@ -73,7 +81,7 @@ class HabitCubit extends Cubit<HabitState> {
   /// Convenience alias for toggleHabitCompletion.
   void toggleHabit(String id) => toggleHabitCompletion(id);
 
-  /// Registers a new habit entry inside local storage and publishes the updated list state.
+  /// Registers a new habit in Hive local storage, emits new state, and updates widgets.
   void addHabit(HabitModel newHabit) {
     repository.saveHabit(newHabit);
     final updatedHabits = [...state.habits, newHabit];

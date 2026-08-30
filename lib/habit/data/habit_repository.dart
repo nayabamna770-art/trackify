@@ -2,13 +2,19 @@ import 'package:hive/hive.dart';
 import 'package:trackify/core/database/boxes.dart';
 import 'package:trackify/habit/domains/models/habit_model.dart';
 
+/// ============================================================================
+/// HABIT REPOSITORY (DATA LAYER)
+/// ============================================================================
+/// Manages CRUD operations for Habit entities in Hive using pure JSON Map
+/// serialization. This decouples models from rigid binary adapters.
 class HabitRepository {
+  /// Reference to the underlying generic Hive box
   Box get _box => Boxes.habitsBox;
 
+  /// Fetches all stored habits from Hive, parsing raw Map entries via fromJson.
+  /// Returns an empty list for new users — no seeding — so the dashboard
+  /// correctly shows the new-user Common Habits suggestion screen.
   List<HabitModel> getHabits() {
-    if (_box.isEmpty) {
-      _seedDefaultHabits();
-    }
     final List<HabitModel> habits = [];
     for (var value in _box.values) {
       if (value is Map) {
@@ -20,10 +26,12 @@ class HabitRepository {
     return habits;
   }
 
+  /// Persists or updates a single Habit entity as a JSON map.
   Future<void> saveHabit(HabitModel habit) async {
     await _box.put(habit.id, habit.toJson());
   }
 
+  /// Bulk saves a list of Habit entities.
   Future<void> saveAllHabits(List<HabitModel> habits) async {
     final Map<String, dynamic> habitMap = {
       for (var habit in habits) habit.id: habit.toJson()
@@ -31,43 +39,8 @@ class HabitRepository {
     await _box.putAll(habitMap);
   }
 
+  /// Deletes a habit by its unique ID.
   Future<void> deleteHabit(String id) async {
     await _box.delete(id);
-  }
-
-  void _seedDefaultHabits() {
-    final defaultHabits = [
-      HabitModel(
-        id: '1',
-        name: 'Deep Work & Coding',
-        category: 'Productivity',
-        streak: 18,
-        isCompletedToday: true,
-        type: 'productivity',
-        weeklyProgress: const [true, true, true, true, true, true, true],
-      ),
-      HabitModel(
-        id: '2',
-        name: 'Quantum Physics Reading',
-        category: 'Education',
-        streak: 5,
-        isCompletedToday: false,
-        type: 'education',
-        weeklyProgress: const [true, false, true, true, true, false, false],
-      ),
-      HabitModel(
-        id: '3',
-        name: 'Gym & Core Strength',
-        category: 'Health',
-        streak: 12,
-        isCompletedToday: true,
-        type: 'health',
-        weeklyProgress: const [true, true, false, true, true, true, true],
-      ),
-    ];
-
-    for (var habit in defaultHabits) {
-      _box.put(habit.id, habit.toJson());
-    }
   }
 }

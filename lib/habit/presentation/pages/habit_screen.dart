@@ -11,6 +11,12 @@ import 'package:trackify/habit/presentation/widgets/appreciation_card_dialog.dar
 import 'package:trackify/habit/presentation/widgets/current_task_timer_bottom_sheet.dart';
 import 'package:trackify/habit/presentation/widgets/habit_card.dart';
 
+/// ============================================================================
+/// HABIT SCREEN (FRONTEND PRESENTATION)
+/// ============================================================================
+/// Displays active habits with weekly streak progress, today's completion toggle,
+/// a "Current Task" focus session countdown timer with confetti appreciation,
+/// and an AppBar button to launch the habit configuration screen.
 class HabitScreen extends StatelessWidget {
   const HabitScreen({super.key});
 

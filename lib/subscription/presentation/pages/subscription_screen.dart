@@ -14,6 +14,12 @@ import 'package:trackify/subscription/logic/subscription_state.dart';
 import 'package:trackify/subscription/presentation/widgets/add_subscription_bottom_sheet.dart';
 import 'package:trackify/subscription/presentation/widgets/subscription_card.dart';
 
+/// ============================================================================
+/// SUBSCRIPTION SCREEN (FRONTEND PRESENTATION)
+/// ============================================================================
+/// Displays user recurring subscriptions, estimated monthly cost, urgent
+/// renewal alerts, and category filtering (All, Active, Urgent, Habit-linked).
+/// Supports empty state for new users and interactive 3D cards for existing users.
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
 

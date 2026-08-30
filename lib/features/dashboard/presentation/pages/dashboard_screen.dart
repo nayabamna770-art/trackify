@@ -16,6 +16,15 @@ import 'package:trackify/settings/presentation/pages/setting_screen.dart';
 import 'package:trackify/subscription/data/models/subscription_model.dart';
 import 'package:trackify/subscription/data/subscription_repository.dart';
 
+/// ============================================================================
+/// DASHBOARD SCREEN (FRONTEND PRESENTATION)
+/// ============================================================================
+/// The central hub of Trackify:
+/// 1. Top Bar: Theme switcher modal & Settings screen navigation.
+/// 2. Dual State:
+///    - New User: Interactive Common Habits quick-add suggestions.
+///    - Existing User: Live checklist with 100% completion Confetti explosion.
+/// 3. Habit Analytics: Performance charts and GitHub-style contribution matrix.
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 

@@ -11,6 +11,12 @@ import 'package:trackify/features/dashboard/presentation/pages/dashboard_screen.
 import 'package:trackify/habit/presentation/pages/habit_screen.dart';
 import 'package:trackify/subscription/presentation/pages/subscription_screen.dart';
 
+/// ============================================================================
+/// MAIN SCREEN SHELL (APPLICATION NAVIGATION CONTAINER)
+/// ============================================================================
+/// Houses the persistent screen IndexedStack (Dashboard, Habits, Subscriptions),
+/// renders the floating glass capsule bottom navigation bar, and listens for
+/// native Android Home Screen Widget click events/deep links.
 class MainScreenShell extends StatefulWidget {
   const MainScreenShell({super.key});
 
@@ -188,8 +194,8 @@ class _MainScreenShellState extends State<MainScreenShell> {
   }
 }
 
-/// A dedicated overview tab for habits that allows users to view active habits
-/// and launch the [HabitScreen] configuration form via a Floating Action Button.
+// A dedicated overview tab for habits that allows users to view active habits
+// and launch the [HabitScreen] configuration form via a Floating Action Button.
 class HabitOverviewTab extends StatelessWidget {
   const HabitOverviewTab({super.key});
 

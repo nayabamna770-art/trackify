@@ -10,6 +10,14 @@ import 'package:trackify/core/widgets/spring_scale_button.dart';
 import 'package:trackify/habit/bloc/habit_cubit.dart';
 import 'package:trackify/subscription/logic/subscription_cubit.dart';
 
+/// ============================================================================
+/// SETTINGS SCREEN (FRONTEND CONFIGURATION)
+/// ============================================================================
+/// Provides core user preferences and data management:
+/// 1. Profile Section: User name & focus role editing with Hive persistence.
+/// 2. Preferences: Default currency selection, subscription & habit reminder toggles.
+/// 3. Security: Biometric / PIN lock toggle.
+/// 4. Data Management: Complete reset of all Hive boxes (habits, subscriptions, profile).
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
